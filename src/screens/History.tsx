@@ -6,8 +6,6 @@ export default function History() {
 
   return (
     <View className="flex-1 bg-white p-5">
-      <Text className="text-2xl font-bold mb-4">Tournament History</Text>
-
       <FlatList
         data={tournaments}
         keyExtractor={(t) => t.id}

@@ -13,6 +13,7 @@ import FixturesScreen from "./src/screens/Fixtures";
 import ResultsScreen from "./src/screens/Results";
 import HistoryScreen from "./src/screens/History";
 import SettingsScreen from "./src/screens/Settings";
+import AddPlayersScreen from "./src/screens/AddPlayers";
 
 // 👇 Add the type here:
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -29,7 +30,13 @@ export default function App() {
           headerTitleAlign: "center",
         }}
       >
-        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{
+            title: "Tournament Master",
+          }}
+        />
         <Stack.Screen
           name="CreateTournament"
           component={CreateTournamentScreen}
@@ -39,6 +46,11 @@ export default function App() {
           name="AddTeams"
           component={AddTeamsScreen}
           options={{ title: "Add Teams" }}
+        />
+        <Stack.Screen
+          name="AddPlayers"
+          component={AddPlayersScreen}
+          options={{ title: "Add Players" }}
         />
         <Stack.Screen
           name="Fixtures"

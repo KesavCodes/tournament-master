@@ -7,15 +7,11 @@ type Props = NativeStackScreenProps<RootStackParamList, "CreateTournament">;
 
 export default function CreateTournament({ navigation }: Props) {
   const [name, setName] = useState("");
-  const [type, setType] = useState("knockout");
+  const [tournamentType, setTournamentType] = useState("knockout");
 
   return (
     <View className="flex-1 bg-white p-5">
-      <Text className="text-2xl font-bold mb-4 text-gray-900">
-        Create Tournament
-      </Text>
-
-      <Text className="mb-2 text-gray-600">Tournament Name</Text>
+      <Text className="mb-2 font-semibold text-gray-600">Tournament Name</Text>
       <TextInput
         className="border border-gray-300 p-3 rounded-2xl mb-5"
         placeholder="Enter name"
@@ -23,33 +19,33 @@ export default function CreateTournament({ navigation }: Props) {
         onChangeText={setName}
       />
 
-      <Text className="mb-2 text-gray-600">Select Format</Text>
+      <Text className="mb-2 font-semibold text-gray-600">Select Format</Text>
       <View className="flex-row mb-5">
-        {["knockout", "league"].map((t) => (
+        {["knockout", "league"].map((type) => (
           <TouchableOpacity
-            key={t}
+            key={type}
             className={`flex-1 mx-1 p-3 rounded-2xl ${
-              type === t ? "bg-blue-600" : "bg-gray-200"
+              type === tournamentType ? "bg-blue-600" : "bg-gray-200"
             }`}
-            onPress={() => setType(t)}
+            onPress={() => setTournamentType(type)}
+            activeOpacity={1}
           >
             <Text
               className={`text-center font-semibold ${
-                type === t ? "text-white" : "text-gray-700"
+                type === tournamentType ? "text-white" : "text-gray-700"
               }`}
             >
-              {t === "knockout" ? "Knockout" : "League"}
+              {type === "knockout" ? "Knockout" : "League"}
             </Text>
           </TouchableOpacity>
         ))}
       </View>
-
       <TouchableOpacity
         className="bg-blue-600 py-3 rounded-2xl"
         onPress={() =>
           navigation.navigate("AddTeams", {
             name,
-            type: type as "knockout" | "league",
+            type: tournamentType as "knockout" | "league",
           })
         }
       >
