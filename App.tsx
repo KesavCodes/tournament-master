@@ -8,12 +8,12 @@ import type { RootStackParamList } from "./src/types/navigation";
 
 import HomeScreen from "./src/screens/Home";
 import CreateTournamentScreen from "./src/screens/CreateTournament";
-import AddTeamsScreen from "./src/screens/AddTeams";
 import FixturesScreen from "./src/screens/Fixtures";
 import ResultsScreen from "./src/screens/Results";
 import HistoryScreen from "./src/screens/History";
 import SettingsScreen from "./src/screens/Settings";
 import AddPlayersScreen from "./src/screens/AddPlayers";
+import AddTeamsAndPlayers from "./src/screens/AddTeamsAndPlayers";
 
 // 👇 Add the type here:
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -44,13 +44,8 @@ export default function App() {
         />
         <Stack.Screen
           name="AddTeams"
-          component={AddTeamsScreen}
-          options={{ title: "Add Teams" }}
-        />
-        <Stack.Screen
-          name="AddPlayers"
-          component={AddPlayersScreen}
-          options={{ title: "Add Players" }}
+          component={AddTeamsAndPlayers}
+          options={{ title: "Add Teams and Players" }}
         />
         <Stack.Screen
           name="Fixtures"
