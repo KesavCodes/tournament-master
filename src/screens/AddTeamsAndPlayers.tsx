@@ -11,8 +11,11 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../types/navigation";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import RNPickerSelect from "react-native-picker-select";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../store";
+import { updateTournament } from "../store/tournamentsSlice";
 
-type Props = NativeStackScreenProps<RootStackParamList, "AddTeams">;
+type Props = NativeStackScreenProps<RootStackParamList, "AddTeamsAndPlayers">;
 
 interface Player {
   id: string;
@@ -21,7 +24,17 @@ interface Player {
 }
 
 export default function AddTeamsAndPlayers({ navigation, route }: Props) {
-  // const { name, type } = route.params;
+  const { id: currTournamentId } = route.params;
+  const dispatch = useDispatch();
+
+  const tournaments = useSelector((state: RootState) => state.tournaments.list);
+
+  const currTournament = tournaments.find(
+    (tournament) => tournament.id === currTournamentId
+  );
+
+  if (!currTournament) navigation.navigate("Home");
+
   const [teams, setTeams] = useState<{ id: string; name: string }[]>([]);
   // const [teamCount, setTeamCount] = useState(0);
   const [players, setPlayers] = useState<Player[]>([]);
@@ -104,9 +117,16 @@ export default function AddTeamsAndPlayers({ navigation, route }: Props) {
   const allAssigned = players.length > 0 && players.every((p) => !!p.teamId);
 
   const proceed = () => {
-    if (!allAssigned) return;
-    navigation.navigate("Fixtures", { teams });
+    if (!allAssigned || !currTournament) return;
+    const updatedTournament = {
+      ...currTournament,
+      teams,
+      players,
+    };
+    dispatch(updateTournament(updatedTournament));
+    navigation.navigate("Fixtures", { id: currTournamentId });
   };
+
   return (
     <View className="flex-1 bg-blue-50 p-5">
       {/* <View className="p-3 flex-row rounded-2xl h-[5%] bg-white shadow-black drop-shadow-md mb-6">

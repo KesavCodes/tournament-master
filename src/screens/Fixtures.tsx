@@ -2,11 +2,24 @@ import { View, Text, TouchableOpacity, FlatList } from "react-native";
 import React from "react";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../types/navigation";
+import { useSelector } from "react-redux";
+import { RootState } from "../store";
+import { Team } from "../store/tournamentsSlice";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Fixtures">;
 
 export default function Fixtures({ navigation, route }: Props) {
-  const { teams } = route.params;
+  const { id: currTournamentId } = route.params;
+
+  const tournaments = useSelector((state: RootState) => state.tournaments.list);
+
+  const currTournament = tournaments.find(
+    (tournament) => tournament.id === currTournamentId
+  );
+
+  let teams: Team[] = []
+  if (!currTournament) navigation.navigate("Home");
+  else teams = currTournament.teams;
 
   let allMatches: any[] = [];
   for (let i = 0; i < teams.length; i++) {

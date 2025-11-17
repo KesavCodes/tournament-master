@@ -2,12 +2,33 @@ import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import React, { useState } from "react";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../types/navigation";
+import { addTournament } from "../store/tournamentsSlice";
+import { useDispatch } from "react-redux";
 
 type Props = NativeStackScreenProps<RootStackParamList, "CreateTournament">;
 
 export default function CreateTournament({ navigation }: Props) {
   const [name, setName] = useState("");
   const [tournamentType, setTournamentType] = useState("knockout");
+  const dispatch = useDispatch();
+
+  const addNewTournament = () => {
+    if(!name){
+      alert("Please enter a tournament name.");
+      return;
+    }
+    const newTournament = {
+      id: Date.now().toString(),
+      name,
+      format: tournamentType,
+      teams: [],
+      players: [],
+    };
+    dispatch(addTournament(newTournament));
+    navigation.navigate("AddTeamsAndPlayers", {
+      id: newTournament.id,
+    });
+  };
 
   return (
     <View className="flex-1 bg-white p-5">
@@ -42,12 +63,7 @@ export default function CreateTournament({ navigation }: Props) {
       </View>
       <TouchableOpacity
         className="bg-blue-600 py-3 rounded-2xl"
-        onPress={() =>
-          navigation.navigate("AddTeams", {
-            name,
-            type: tournamentType as "knockout" | "league",
-          })
-        }
+        onPress={addNewTournament}
       >
         <Text className="text-center text-white text-lg font-semibold">
           Next: Add Teams
