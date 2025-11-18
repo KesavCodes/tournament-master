@@ -23,6 +23,7 @@ export default function CreateTournament({ navigation }: Props) {
       format: tournamentType,
       teams: [],
       players: [],
+      fixtures: [],
     };
     dispatch(addTournament(newTournament));
     navigation.navigate("AddTeamsAndPlayers", {

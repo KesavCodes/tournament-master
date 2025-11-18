@@ -14,6 +14,7 @@ import RNPickerSelect from "react-native-picker-select";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store";
 import { updateTournament } from "../store/tournamentsSlice";
+import { generateFixture } from "../utils/generateFixture";
 
 type Props = NativeStackScreenProps<RootStackParamList, "AddTeamsAndPlayers">;
 
@@ -118,10 +119,12 @@ export default function AddTeamsAndPlayers({ navigation, route }: Props) {
 
   const proceed = () => {
     if (!allAssigned || !currTournament) return;
+    const fixtures = generateFixture(teams);
     const updatedTournament = {
       ...currTournament,
       teams,
       players,
+      fixtures,
     };
     dispatch(updateTournament(updatedTournament));
     navigation.navigate("Fixtures", { id: currTournamentId });

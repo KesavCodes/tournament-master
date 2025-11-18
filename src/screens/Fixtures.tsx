@@ -1,4 +1,10 @@
-import { View, Text, TouchableOpacity, FlatList } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  FlatList,
+  Alert,
+} from "react-native";
 import React from "react";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../types/navigation";
@@ -16,46 +22,42 @@ export default function Fixtures({ navigation, route }: Props) {
   const currTournament = tournaments.find(
     (tournament) => tournament.id === currTournamentId
   );
-
-  let teams: Team[] = []
   if (!currTournament) navigation.navigate("Home");
-  else teams = currTournament.teams;
-
-  let allMatches: any[] = [];
-  for (let i = 0; i < teams.length; i++) {
-    for (let j = i + 1; j < teams.length; j++) {
-      allMatches.push({
-        id: `${Number(teams[i].id) + Number(teams[j].id)}`,
-        teamA: teams[i].name,
-        teamB: teams[j].name,
-      });
-    }
-  }
-
-  // sort matches to alternate between teams
-  allMatches = allMatches.sort((a, b) => Number(a.id) - Number(b.id));
-
-  const matchFixtures = [];
-  let p1 = 0;
-  let p2 = allMatches.length - 1;
-  while (p1 < p2) {
-    matchFixtures.push(allMatches[p1], allMatches[p2]);
-    p1++;
-    p2--;
-  }
-  if (p1 === p2) {
-    matchFixtures.push(allMatches[p1]);
-  }
-
+  const matchResultHandler = (matchId: string) => {
+    // TODO: I want to give user two teams and wait for their input to record result
+    const matchIndex = currTournament?.fixtures.findIndex(
+      (m) => m.id === matchId
+    );
+    if (matchIndex === undefined || matchIndex < 0 || !currTournament) return;
+    Alert.alert(
+      `Record result for ${currTournament.fixtures[matchIndex].teamA} vs ${currTournament.fixtures[matchIndex].teamB}`,
+      "Select the winning team",
+      [
+        {
+          text: currTournament.fixtures[matchIndex].teamA,
+          onPress: () => Alert.alert("Cancel Pressed"),
+          style: "cancel"
+        },
+        {
+          text: currTournament.fixtures[matchIndex].teamB,
+          onPress: () => Alert.alert("Cancel Pressed"),
+          style:"destructive"
+        },
+      ],
+      {
+        cancelable: true,
+      }
+    );
+  };
   return (
     <View className="flex-1 bg-white p-5">
       <FlatList
-        data={matchFixtures}
+        data={currTournament?.fixtures ?? []}
         keyExtractor={(m) => m.id}
         renderItem={({ item }) => (
           <TouchableOpacity
             className="border border-gray-200 rounded-2xl p-3 mb-3"
-            // onPress={() => navigation.navigate("Results", { name })}
+            onPress={() => matchResultHandler(item.id)}
           >
             <Text className="font-semibold">
               {item.teamA} vs {item.teamB}

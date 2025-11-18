@@ -11,12 +11,20 @@ export interface Player {
   team_id?: string;
 }
 
+export interface Fixture {
+  id: string;
+  teamA: string; 
+  teamB: string;
+  result?: string;
+}
+
 export interface Tournament {
   id: string;
   name: string;
   format: string;
   teams: Team[];
   players: Player[];
+  fixtures: Fixture[];
 }
 
 interface TournamentsState {
