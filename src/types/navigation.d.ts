@@ -6,6 +6,7 @@ export type RootStackParamList = {
     id: string;
   };
   Results: { name: string };
+  Scoreboard: { id: string };
   History: undefined;
   Settings: undefined;
 };

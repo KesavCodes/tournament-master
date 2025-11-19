@@ -14,7 +14,7 @@ import type { RootStackParamList } from "./src/types/navigation";
 import HomeScreen from "./src/screens/Home";
 import CreateTournamentScreen from "./src/screens/CreateTournament";
 import FixturesScreen from "./src/screens/Fixtures";
-import ResultsScreen from "./src/screens/Results";
+import ScoreboardScreen from "./src/screens/Scoreboard";
 import HistoryScreen from "./src/screens/History";
 import SettingsScreen from "./src/screens/Settings";
 import AddTeamsAndPlayers from "./src/screens/AddTeamsAndPlayers";
@@ -52,7 +52,7 @@ export default function App() {
           <Stack.Navigator
             initialRouteName="Home"
             screenOptions={{
-              headerStyle: { backgroundColor: "#2563EB" },
+              headerStyle: { backgroundColor: "#1c2b38" },
               headerTintColor: "#fff",
               headerTitleAlign: "center",
             }}
@@ -78,9 +78,9 @@ export default function App() {
               options={{ title: "Fixtures" }}
             />
             <Stack.Screen
-              name="Results"
-              component={ResultsScreen}
-              options={{ title: "Results" }}
+              name="Scoreboard"
+              component={ScoreboardScreen}
+              options={{ title: "Scoreboard" }}
             />
             <Stack.Screen
               name="History"
