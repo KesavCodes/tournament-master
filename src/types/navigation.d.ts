@@ -1,7 +1,7 @@
 export type RootStackParamList = {
   Home: undefined;
-  CreateTournament: undefined;
-  AddTeamsAndPlayers: { id: string };
+  CreateTournament: { id: string};
+  AddTeamsAndPlayers: { id: string, action: "create" | "edit" };
   Fixtures: {
     id: string;
   };

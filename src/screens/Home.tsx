@@ -9,11 +9,16 @@ type Props = NativeStackScreenProps<RootStackParamList, "Home">;
 
 export default function Home({ navigation }: Props) {
   const tournaments = useSelector((state: RootState) => state.tournaments.list);
+  console.log(tournaments);
   return (
     <View className="flex-1 bg-gray-100 items-center px-6 ">
       <TouchableOpacity
         className="bg-gray-800 px-12 py-3 rounded-2xl mb-3 mt-6 w-3/4"
-        onPress={() => navigation.navigate("CreateTournament")}
+        onPress={() =>
+          navigation.navigate("CreateTournament", {
+            id: "",
+          })
+        }
       >
         <Text className="text-white text-2xl font-semibold text-center">
           Create Tournament
@@ -33,15 +38,23 @@ export default function Home({ navigation }: Props) {
             </Text>
           </TouchableOpacity>
         </View>
-
         <FlatList
           data={tournaments}
           keyExtractor={(tournament) => tournament.id}
           className="w-full mb-4"
+          ListEmptyComponent={
+            <Text className="text-center text-lg my-12">
+              No Tournaments found
+            </Text>
+          }
           renderItem={({ item }) => (
             <TouchableOpacity
               className="bg-gray-800 rounded-2xl mx-4 my-2 px-4 py-6"
-              onPress={() => navigation.navigate("Fixtures", { id: item.id })}
+              onPress={() =>
+                item.configCompleted
+                  ? navigation.navigate("Fixtures", { id: item.id })
+                  : navigation.navigate("CreateTournament", { id: item.id })
+              }
             >
               <View className="flex flex-row justify-between items-center mb-4">
                 <Text className="font-semibold text-white text-lg">

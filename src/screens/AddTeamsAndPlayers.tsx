@@ -25,7 +25,7 @@ interface Player {
 }
 
 export default function AddTeamsAndPlayers({ navigation, route }: Props) {
-  const { id: currTournamentId } = route.params;
+  const { id: currTournamentId, action } = route.params;
   const dispatch = useDispatch();
 
   const tournaments = useSelector((state: RootState) => state.tournaments.list);
@@ -36,9 +36,18 @@ export default function AddTeamsAndPlayers({ navigation, route }: Props) {
 
   if (!currTournament) navigation.navigate("Home");
 
-  const [teams, setTeams] = useState<{ id: string; name: string }[]>([]);
+  const [teams, setTeams] = useState<{ id: string; name: string }[]>(
+    action === "edit"
+      ? currTournament?.teams || []
+      : new Array(currTournament?.noOfTeams || 0).fill("").map((_, index) => ({
+          id: Date.now().toString() + index,
+          name: `Team ${index + 1}`,
+        }))
+  );
   // const [teamCount, setTeamCount] = useState(0);
-  const [players, setPlayers] = useState<Player[]>([]);
+  const [players, setPlayers] = useState<Player[]>(
+    action === "edit" ? currTournament?.players || [] : []
+  );
   const [playerName, setPlayerName] = useState("");
   const [teamName, setTeamName] = useState("");
   const [error, setError] = useState({ team: false, player: false });
@@ -93,6 +102,14 @@ export default function AddTeamsAndPlayers({ navigation, route }: Props) {
   };
 
   const removeTeam = (id: string, name: string) => {
+    if (teams.length <= 2) {
+      Alert.alert(
+        `Cannot Delete - ${name}`,
+        "At least two teams are required in a tournament.",
+        [{ text: "OK", style: "cancel" }]
+      );
+      return;
+    }
     Alert.alert(
       `Delete Team - ${name}`,
       "Are you sure you want to delete this team?",
@@ -103,6 +120,23 @@ export default function AddTeamsAndPlayers({ navigation, route }: Props) {
           style: "destructive",
           onPress: () => {
             setTeams(teams.filter((team) => team.id !== id));
+          },
+        },
+      ]
+    );
+  };
+
+  const removePlayer = (id: string, name: string) => {
+    Alert.alert(
+      `Delete Player - ${name}`,
+      "Are you sure you want to delete this player?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            setPlayers(players.filter((player) => player.id !== id));
           },
         },
       ]
@@ -131,7 +165,7 @@ export default function AddTeamsAndPlayers({ navigation, route }: Props) {
   };
 
   return (
-    <View className="flex-1 bg-blue-50 p-5">
+    <View className="flex-1 bg-gray-200 p-5">
       {/* <View className="p-3 flex-row rounded-2xl h-[5%] bg-white shadow-black drop-shadow-md mb-6">
         <Text className="text-2xl font-bold text-gray-800">
           Enter Teams Count
@@ -145,17 +179,17 @@ export default function AddTeamsAndPlayers({ navigation, route }: Props) {
         />
       </View> */}
       <View className="p-3 rounded-2xl h-[40%] bg-white shadow-black drop-shadow-md">
-        <Text className="text-2xl font-bold text-gray-800 mb-4">Add Teams</Text>
-        <View className="flex-row">
+        <Text className="text-2xl font-bold text-gray-800 mb-4">Teams</Text>
+        {/* <View className="flex-row">
           <TextInput
-            className={`flex-1 border-b-2 p-3 mr-4 ${error.team ? "border-red-500" : "border-blue-600"}`}
+            className={`flex-1 border-b-2 p-3 mr-4 ${error.team ? "border-red-500" : "border-gray-800"}`}
             placeholder="Team Name"
             value={teamName}
             onChangeText={updateTeamName}
             maxLength={20}
           />
           <TouchableOpacity
-            className="bg-blue-600 px-4 rounded-2xl justify-center"
+            className="bg-gray-800 px-4 rounded-2xl justify-center"
             onPress={addTeam}
             activeOpacity={1}
           >
@@ -164,7 +198,7 @@ export default function AddTeamsAndPlayers({ navigation, route }: Props) {
         </View>
         {error.team && (
           <Text className="text-red-500 mt-2">Team name cannot be empty</Text>
-        )}
+        )} */}
         <FlatList
           data={teams}
           keyExtractor={(team) => team.id}
@@ -172,9 +206,16 @@ export default function AddTeamsAndPlayers({ navigation, route }: Props) {
           renderItem={({ item }) => (
             <View className="bg-gray-100 p-3 mb-2 rounded-2xl d-flex flex-row justify-between items-center">
               <Text>{item.name}</Text>
-              <TouchableOpacity onPress={() => removeTeam(item.id, item.name)}>
-                <Ionicons name="trash-bin" size={24} color="#ff3838ff" />
-              </TouchableOpacity>
+              <View className="flex flex-row gap-4 items-center">
+                <TouchableOpacity onPress={() => {}}>
+                  <Ionicons name="create-outline" size={20} color="#000" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => removeTeam(item.id, item.name)}
+                >
+                  <Ionicons name="trash-bin" size={20} color="#ff3838ff" />
+                </TouchableOpacity>
+              </View>
             </View>
           )}
           ListEmptyComponent={
@@ -191,8 +232,9 @@ export default function AddTeamsAndPlayers({ navigation, route }: Props) {
           </Text>
           <TouchableOpacity
             onPress={randomizeTeams}
-            className="bg-blue-600 px-3 py-2 rounded-xl"
+            className={` px-3 py-2 rounded-xl ${teams.length === 0 || players.length === 0 ? "bg-gray-400" : "bg-gray-800"}`}
             activeOpacity={1}
+            disabled={teams.length === 0 || players.length === 0}
           >
             <Text className="text-white font-semibold text-sm">
               Randomize Teams
@@ -201,7 +243,7 @@ export default function AddTeamsAndPlayers({ navigation, route }: Props) {
         </View>
         <View className="flex-row mb-4">
           <TextInput
-            className={`flex-1 border-b-2 p-3 mr-4 ${error.player ? "border-red-500" : "border-blue-600"}`}
+            className={`flex-1 border-b-2 p-3 mr-4 ${error.player ? "border-red-500" : "border-gray-800"}`}
             placeholder="Enter player name"
             value={playerName}
             onChangeText={updatePlayerName}
@@ -209,7 +251,7 @@ export default function AddTeamsAndPlayers({ navigation, route }: Props) {
           />
           <TouchableOpacity
             onPress={addPlayer}
-            className="bg-blue-600 px-4 justify-center rounded-xl"
+            className="bg-gray-800 px-4 justify-center rounded-xl"
             activeOpacity={1}
           >
             <Text className="text-white font-semibold">Add</Text>
@@ -225,9 +267,16 @@ export default function AddTeamsAndPlayers({ navigation, route }: Props) {
           className="mt-1 rounded-2xl py-2"
           renderItem={({ item }) => (
             <View className="bg-gray-100 rounded-xl p-3 mb-2">
-              <Text className="font-semibold text-gray-800 mb-2">
-                {item.name}
-              </Text>
+              <View className="d-flex flex-row justify-between items-center mb-2">
+                <Text className="font-semibold text-gray-800 mb-2">
+                  {item.name}
+                </Text>
+                <TouchableOpacity
+                  onPress={() => removePlayer(item.id, item.name)}
+                >
+                  <Ionicons name="trash-bin" size={20} color="#ff3838ff" />
+                </TouchableOpacity>
+              </View>
               <View className="border border-gray-300 rounded-xl">
                 <RNPickerSelect
                   onValueChange={(val) => assignTeam(item.id, val)}
@@ -260,7 +309,7 @@ export default function AddTeamsAndPlayers({ navigation, route }: Props) {
         disabled={!allAssigned}
         onPress={proceed}
         className={`mt-4 py-4 rounded-2xl ${
-          allAssigned ? "bg-blue-600" : "bg-gray-400"
+          allAssigned ? "bg-gray-800" : "bg-gray-400"
         }`}
       >
         <Text className="text-center text-white font-semibold text-lg">

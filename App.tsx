@@ -75,7 +75,7 @@ export default function App() {
             <Stack.Screen
               name="Fixtures"
               component={FixturesScreen}
-              options={{ title: "Fixtures" }}
+              options={{ title: "Match Schedule" }}
             />
             <Stack.Screen
               name="Scoreboard"

@@ -22,6 +22,8 @@ export interface Tournament {
   id: string;
   name: string;
   format: string;
+  configCompleted: boolean;
+  noOfTeams: number;
   teams: Team[];
   players: Player[];
   fixtures: Fixture[];

@@ -6,7 +6,7 @@ import {
   Alert,
   Modal,
 } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../types/navigation";
 import { useDispatch, useSelector } from "react-redux";
@@ -62,6 +62,19 @@ export default function Fixtures({ navigation, route }: Props) {
     );
     setShowModal(false);
   };
+
+  useEffect(() => {
+    const sub = navigation.addListener("beforeRemove", (e) => {
+      e.preventDefault();
+
+      navigation.navigate("CreateTournament", {
+        id: currTournamentId,
+      });
+    });
+
+    return sub;
+  }, [navigation, currTournamentId]);
+
   return (
     <View className="flex-1 bg-white p-5">
       <Modal
