@@ -18,6 +18,7 @@ import ScoreboardScreen from "./src/screens/Scoreboard";
 import HistoryScreen from "./src/screens/History";
 import SettingsScreen from "./src/screens/Settings";
 import AddTeamsAndPlayers from "./src/screens/AddTeamsAndPlayers";
+import TeamInfoScreen from "./src/screens/TeamInfo";
 
 import { useDispatch } from "react-redux";
 import { setTournaments } from "./src/store/tournamentsSlice";
@@ -60,7 +61,7 @@ export default function App() {
             <Stack.Screen
               name="Home"
               component={HomeScreen}
-              options={{ title: "Tournament Master" }}
+              options={{ title: "Tournament Master", headerBackVisible: false }}
             />
             <Stack.Screen
               name="CreateTournament"
@@ -91,6 +92,11 @@ export default function App() {
               name="Settings"
               component={SettingsScreen}
               options={{ title: "Settings" }}
+            />
+            <Stack.Screen
+              name="TeamInfo"
+              component={TeamInfoScreen}
+              options={{ title: "Team Info" }}
             />
           </Stack.Navigator>
         </NavigationContainer>

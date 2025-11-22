@@ -15,6 +15,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store";
 import { updateTournament } from "../store/tournamentsSlice";
 import { generateFixture } from "../utils/generateFixture";
+import { generateCoolTeamNames } from "../utils/generateRandomTeamName";
 
 type Props = NativeStackScreenProps<RootStackParamList, "AddTeamsAndPlayers">;
 
@@ -25,7 +26,7 @@ interface Player {
 }
 
 export default function AddTeamsAndPlayers({ navigation, route }: Props) {
-  const { id: currTournamentId, action } = route.params;
+  const { id: currTournamentId } = route.params;
   const dispatch = useDispatch();
 
   const tournaments = useSelector((state: RootState) => state.tournaments.list);
@@ -34,25 +35,18 @@ export default function AddTeamsAndPlayers({ navigation, route }: Props) {
     (tournament) => tournament.id === currTournamentId
   );
 
-  if (!currTournament) navigation.navigate("Home");
-
   const [teams, setTeams] = useState<{ id: string; name: string }[]>(
-    action === "edit"
-      ? currTournament?.teams || []
-      : new Array(currTournament?.noOfTeams || 0).fill("").map((_, index) => ({
-          id: Date.now().toString() + index,
-          name: `Team ${index + 1}`,
-        }))
+    currTournament?.teams || []
   );
-  // const [teamCount, setTeamCount] = useState(0);
+  const [editingTeamId, setEditingTeamId] = useState<string | null>(null);
+  const [teamName, setTeamName] = useState("");
   const [players, setPlayers] = useState<Player[]>(
-    action === "edit" ? currTournament?.players || [] : []
+    currTournament?.players || []
   );
   const [playerName, setPlayerName] = useState("");
-  const [teamName, setTeamName] = useState("");
   const [error, setError] = useState({ team: false, player: false });
-  // TODO: Need to store the store and show it on subsequent use.
-  // const existingTeams = [];
+
+  if (!currTournament) navigation.navigate("Home");
 
   const randomizeTeams = () => {
     if (!teams.length || !players.length) return;
@@ -70,13 +64,50 @@ export default function AddTeamsAndPlayers({ navigation, route }: Props) {
     setPlayers(playersAddedOrder);
   };
 
-  const addTeam = () => {
-    if (!teamName.trim()) {
-      setError({ ...error, team: true });
-      return;
-    }
-    setTeams([...teams, { id: Date.now().toString(), name: teamName }]);
+  const startEditing = (teamId: string, currentName: string) => {
+    setEditingTeamId(teamId);
+    setTeamName(currentName);
+  };
+
+  const cancelEditing = () => {
+    setEditingTeamId(null);
     setTeamName("");
+  };
+
+  const saveTeamName = (id: string) => {
+    const trimmed = teamName.trim();
+    if (!trimmed) return;
+
+    const updatedTeams = teams.map((team) =>
+      team.id === id ? { ...team, name: trimmed } : team
+    );
+
+    setTeams(updatedTeams);
+    if (!currTournament) return;
+    const updatedTournament = {
+      ...currTournament,
+      teams: updatedTeams,
+    };
+    dispatch(updateTournament(updatedTournament));
+    setEditingTeamId(null);
+    setTeamName("");
+  };
+
+  const generateTeamNames = () => {
+    if (!currTournament?.noOfTeams) return;
+    const coolTeamNames = generateCoolTeamNames(currTournament.noOfTeams);
+    const updatedTeams = teams.map((team, index) => ({
+      ...team,
+      name: coolTeamNames[index] || team.name,
+    }));
+
+    setTeams(updatedTeams);
+    if (!currTournament) return;
+    const updatedTournament = {
+      ...currTournament,
+      teams: updatedTeams,
+    };
+    dispatch(updateTournament(updatedTournament));
   };
 
   const addPlayer = () => {
@@ -91,39 +122,9 @@ export default function AddTeamsAndPlayers({ navigation, route }: Props) {
     setPlayerName("");
   };
 
-  const updateTeamName = (text: string) => {
-    setTeamName(text);
-    setError({ ...error, team: false });
-  };
-
   const updatePlayerName = (text: string) => {
     setPlayerName(text);
     setError({ ...error, player: false });
-  };
-
-  const removeTeam = (id: string, name: string) => {
-    if (teams.length <= 2) {
-      Alert.alert(
-        `Cannot Delete - ${name}`,
-        "At least two teams are required in a tournament.",
-        [{ text: "OK", style: "cancel" }]
-      );
-      return;
-    }
-    Alert.alert(
-      `Delete Team - ${name}`,
-      "Are you sure you want to delete this team?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => {
-            setTeams(teams.filter((team) => team.id !== id));
-          },
-        },
-      ]
-    );
   };
 
   const removePlayer = (id: string, name: string) => {
@@ -159,68 +160,112 @@ export default function AddTeamsAndPlayers({ navigation, route }: Props) {
       teams,
       players,
       fixtures,
+      configCompleted: true,
     };
     dispatch(updateTournament(updatedTournament));
     navigation.navigate("Fixtures", { id: currTournamentId });
   };
 
+  useEffect(() => {
+    navigation.addListener("beforeRemove", (e) => {
+      e.preventDefault(); // block default back
+
+      navigation.navigate("CreateTournament", {
+        id: currTournamentId,
+      });
+    });
+  }, [navigation, currTournamentId]);
+
   return (
     <View className="flex-1 bg-gray-200 p-5">
-      {/* <View className="p-3 flex-row rounded-2xl h-[5%] bg-white shadow-black drop-shadow-md mb-6">
-        <Text className="text-2xl font-bold text-gray-800">
-          Enter Teams Count
-        </Text>
-        <TextInput
-          className={`flex-1 border-b-2 p-3 mr-4 ${error.team ? "border-red-500" : "border-blue-600"}`}
-          value={teamCount !==0 ? teamCount.toString() : ""}
-          onChangeText={(num) => setTeamCount(Number(num))}
-          maxLength={20}
-          keyboardType="number-pad"
-        />
-      </View> */}
       <View className="p-3 rounded-2xl h-[40%] bg-white shadow-black drop-shadow-md">
-        <Text className="text-2xl font-bold text-gray-800 mb-4">Teams</Text>
-        {/* <View className="flex-row">
-          <TextInput
-            className={`flex-1 border-b-2 p-3 mr-4 ${error.team ? "border-red-500" : "border-gray-800"}`}
-            placeholder="Team Name"
-            value={teamName}
-            onChangeText={updateTeamName}
-            maxLength={20}
-          />
+        <View className="flex-row justify-between items-center mb-4">
+          <Text className="text-2xl font-bold text-gray-800 mb-4">Teams</Text>
           <TouchableOpacity
-            className="bg-gray-800 px-4 rounded-2xl justify-center"
-            onPress={addTeam}
+            onPress={generateTeamNames}
+            className={"px-3 py-2 rounded-xl bg-gray-800"}
             activeOpacity={1}
           >
-            <Text className="text-white font-semibold">Add</Text>
+            <Text className="text-white font-semibold text-sm">
+              Generate Cool Team Names
+            </Text>
           </TouchableOpacity>
         </View>
-        {error.team && (
-          <Text className="text-red-500 mt-2">Team name cannot be empty</Text>
-        )} */}
         <FlatList
           data={teams}
           keyExtractor={(team) => team.id}
           className="mt-1 rounded-2xl py-2"
-          renderItem={({ item }) => (
-            <View className="bg-gray-100 p-3 mb-2 rounded-2xl d-flex flex-row justify-between items-center">
-              <Text>{item.name}</Text>
-              <View className="flex flex-row gap-4 items-center">
-                <TouchableOpacity onPress={() => {}}>
-                  <Ionicons name="create-outline" size={20} color="#000" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => removeTeam(item.id, item.name)}
-                >
-                  <Ionicons name="trash-bin" size={20} color="#ff3838ff" />
-                </TouchableOpacity>
+          renderItem={({ item }) => {
+            const isEditing = editingTeamId === item.id;
+
+            return (
+              <View className="bg-gray-100 p-3 mb-2 rounded-2xl flex-row justify-between items-center">
+                {/* Left Section */}
+                {isEditing ? (
+                  <TextInput
+                    value={teamName}
+                    onChangeText={setTeamName}
+                    autoFocus
+                    className="flex-1 border border-gray-300 px-3 py-2 rounded-xl text-base"
+                    placeholder="Enter team name"
+                    maxLength={20}
+                  />
+                ) : (
+                  <Text className="flex-1 text-base">{item.name}</Text>
+                )}
+
+                {/* Right Section */}
+                <View className="flex-row items-center">
+                  {isEditing ? (
+                    <>
+                      {/* Save */}
+                      <TouchableOpacity
+                        onPress={() => saveTeamName(item.id)}
+                        className="mx-2"
+                        activeOpacity={1}
+                      >
+                        <Ionicons
+                          name="checkmark-circle-outline"
+                          size={24}
+                          color="#06b646ff"
+                        />
+                      </TouchableOpacity>
+
+                      {/* Cancel */}
+                      <TouchableOpacity
+                        onPress={cancelEditing}
+                        activeOpacity={1}
+                      >
+                        <Ionicons
+                          name="close-circle-outline"
+                          size={24}
+                          color="#ef4444"
+                        />
+                      </TouchableOpacity>
+                    </>
+                  ) : (
+                    <>
+                      {/* Edit */}
+                      <TouchableOpacity
+                        onPress={() => startEditing(item.id, item.name)}
+                        className="mx-2"
+                        activeOpacity={1}
+                      >
+                        <Ionicons
+                          name="create-outline"
+                          size={20}
+                          color="#000"
+                        />
+                      </TouchableOpacity>
+                    </>
+                  )}
+                </View>
               </View>
-            </View>
-          )}
+            );
+          }}
           ListEmptyComponent={
             <Text className="text-gray-400 text-center mt-10">
-              No Teams added yet.
+              No teams added yet.
             </Text>
           }
         />
@@ -273,6 +318,7 @@ export default function AddTeamsAndPlayers({ navigation, route }: Props) {
                 </Text>
                 <TouchableOpacity
                   onPress={() => removePlayer(item.id, item.name)}
+                  activeOpacity={1}
                 >
                   <Ionicons name="trash-bin" size={20} color="#ff3838ff" />
                 </TouchableOpacity>
@@ -308,12 +354,13 @@ export default function AddTeamsAndPlayers({ navigation, route }: Props) {
       <TouchableOpacity
         disabled={!allAssigned}
         onPress={proceed}
+        activeOpacity={1}
         className={`mt-4 py-4 rounded-2xl ${
           allAssigned ? "bg-gray-800" : "bg-gray-400"
         }`}
       >
         <Text className="text-center text-white font-semibold text-lg">
-          Proceed
+          Confirm and Start Tournament
         </Text>
       </TouchableOpacity>
     </View>

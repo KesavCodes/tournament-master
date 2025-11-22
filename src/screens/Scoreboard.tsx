@@ -26,7 +26,7 @@ export default function Results({ navigation, route }: Props) {
     );
 
   const scoreboardData = generateScoreboard(currTournament.fixtures);
-  console.log(scoreboardData);
+  
   return (
     <View className="flex-1 bg-white p-5">
       <Text className="text-2xl font-bold mb-4">Scoreboard</Text>
@@ -41,14 +41,14 @@ export default function Results({ navigation, route }: Props) {
             key={team.team}
             className="flex flex-row justify-between items-center bg-gray-200 px-4"
           >
-            <Text className="font-semibold text-md w-1/2 border-0 border-r py-4">{team.team}</Text>
+            <Text className="font-semibold text-md w-1/2 border-0 border-r py-4" numberOfLines={1}>{team.team}</Text>
             <Text className="font-medium text-md w-1/4 pl-4 border-0 border-r py-4">{team.played}</Text>
             <Text className="font-medium text-md w-1/4 pl-4 py-4">{team.won}</Text>
           </View>
         ))}
       </View>
       <TouchableOpacity
-        className="bg-green-600 rounded-2xl p-4 mt-6"
+        className="bg-gray-800 rounded-2xl p-4 mt-6"
         onPress={() => navigation.navigate("Fixtures", { id: currTournamentId })}
       >
         <Text className="text-white text-center font-semibold">

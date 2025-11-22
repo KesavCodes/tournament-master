@@ -1,8 +1,12 @@
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
-import React, { useLayoutEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../types/navigation";
-import { addTournament, updateTournament } from "../store/tournamentsSlice";
+import {
+  addTournament,
+  Team,
+  updateTournament,
+} from "../store/tournamentsSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store";
 
@@ -25,22 +29,47 @@ export default function CreateTournament({ navigation, route }: Props) {
 
   const dispatch = useDispatch();
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      title: currTournamentId ? "Edit Tournament" : "Create Tournament",
-    });
-  }, [navigation, currTournamentId]);
+  const populateTeams = () => {
+    let teams: Team[] = [];
+    if (currTournamentId && currTournament) {
+      if (currTournament?.teams?.length > parseInt(noOfTeams, 10)) {
+        teams = currTournament.teams.slice(0, parseInt(noOfTeams, 10));
+      } else if (currTournament?.teams?.length < parseInt(noOfTeams, 10)) {
+        const additionalTeams = new Array(
+          parseInt(noOfTeams, 10) - currTournament.teams.length
+        )
+          .fill("")
+          .map((_, index) => ({
+            id: Date.now().toString() + index,
+            name: `Team ${currTournament.teams.length + index + 1}`,
+          }));
+        teams = [...currTournament.teams, ...additionalTeams];
+      } else teams = currTournament.teams;
+    } else {
+      teams = new Array(parseInt(noOfTeams, 10) || 0)
+        .fill("")
+        .map((_, index) => ({
+          id: Date.now().toString() + index,
+          name: `Team ${index + 1}`,
+        }));
+    }
+    return teams;
+  };
 
   const addNewTournament = () => {
     if (!name) {
       alert("Please enter a tournament name.");
       return;
     }
+    if (!noOfTeams) {
+      alert("Please enter a total number of teams. (Min 2)");
+      return;
+    }
     let tournamentData = {
       id: currTournamentId || Date.now().toString(),
       name,
       format: "league",
-      teams: currTournament?.teams || [],
+      teams: populateTeams(),
       players: currTournament?.players || [],
       fixtures: currTournament?.fixtures || [],
       configCompleted: currTournament?.configCompleted || false,
@@ -53,7 +82,6 @@ export default function CreateTournament({ navigation, route }: Props) {
     }
     navigation.navigate("AddTeamsAndPlayers", {
       id: tournamentData.id,
-      action: currTournamentId ? "edit" : "create",
     });
   };
 
@@ -73,6 +101,19 @@ export default function CreateTournament({ navigation, route }: Props) {
     }
     setNoOfTeams(numberValue.toString());
   };
+
+  useEffect(() => {
+    navigation.addListener("beforeRemove", (e) => {
+      e.preventDefault(); // block default back
+      navigation.navigate("Home");
+    });
+  }, [navigation]);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: currTournamentId ? "Edit Tournament" : "Create Tournament",
+    });
+  }, [navigation, currTournamentId]);
 
   return (
     <View className="flex-1 bg-white p-5">

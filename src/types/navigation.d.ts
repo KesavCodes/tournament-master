@@ -1,7 +1,7 @@
 export type RootStackParamList = {
   Home: undefined;
   CreateTournament: { id: string};
-  AddTeamsAndPlayers: { id: string, action: "create" | "edit" };
+  AddTeamsAndPlayers: { id: string};
   Fixtures: {
     id: string;
   };
@@ -9,4 +9,5 @@ export type RootStackParamList = {
   Scoreboard: { id: string };
   History: undefined;
   Settings: undefined;
+  TeamInfo: { id: string };
 };

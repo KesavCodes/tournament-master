@@ -8,7 +8,7 @@ export interface Team {
 export interface Player {
   id: string;
   name: string;
-  team_id?: string;
+  teamId?: string;
 }
 
 export interface Fixture {
