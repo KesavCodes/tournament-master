@@ -21,11 +21,20 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.kesav07.tournamentmaster"
     },
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "bdb2e247-9433-48d3-a2d4-579bbc5904b7"
+      }
+    },
+    "plugins": [
+      "expo-font"
+    ]
   }
 }

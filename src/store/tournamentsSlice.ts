@@ -3,6 +3,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 export interface Team {
   id: string;
   name: string;
+  teamIdx: number;
 }
 
 export interface Player {

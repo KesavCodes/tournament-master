@@ -1,9 +1,11 @@
-export const generateFixture = (teams: { id: string; name: string }[]) => {
+export const generateFixture = (
+  teams: { id: string; name: string; teamIdx: number }[]
+) => {
   let allMatches: any[] = [];
   for (let i = 0; i < teams.length; i++) {
     for (let j = i + 1; j < teams.length; j++) {
       allMatches.push({
-        id: `${Number(teams[i].id) + Number(teams[j].id)}`,
+        id: `${Number(teams[i].id) + Number(teams[j].id) + teams[i].teamIdx}`,
         teamA: teams[i].name,
         teamB: teams[j].name,
       });

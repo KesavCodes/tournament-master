@@ -42,6 +42,7 @@ export default function CreateTournament({ navigation, route }: Props) {
           .map((_, index) => ({
             id: Date.now().toString() + index,
             name: `Team ${currTournament.teams.length + index + 1}`,
+            teamIdx: currTournament.teams.length + index + 1,
           }));
         teams = [...currTournament.teams, ...additionalTeams];
       } else teams = currTournament.teams;
@@ -51,6 +52,7 @@ export default function CreateTournament({ navigation, route }: Props) {
         .map((_, index) => ({
           id: Date.now().toString() + index,
           name: `Team ${index + 1}`,
+          teamIdx: index + 1,
         }));
     }
     return teams;
