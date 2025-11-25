@@ -1,55 +1,33 @@
 import React from "react";
-import { StatusBar } from "expo-status-bar";
 import "./global.css";
 
 import { Provider } from "react-redux";
-import { store } from "./src/store";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import "./src/store/persist";
+import { store, persistor } from "./src/store";
+import { PersistGate } from "redux-persist/integration/react";
 
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import type { RootStackParamList } from "./src/types/navigation";
+import { StatusBar } from "expo-status-bar";
 
 import HomeScreen from "./src/screens/Home";
 import CreateTournamentScreen from "./src/screens/CreateTournament";
+import AddTeamsAndPlayers from "./src/screens/AddTeamsAndPlayers";
 import FixturesScreen from "./src/screens/Fixtures";
 import ScoreboardScreen from "./src/screens/Scoreboard";
+import TeamInfoScreen from "./src/screens/TeamInfo";
 import HistoryScreen from "./src/screens/History";
 import SettingsScreen from "./src/screens/Settings";
-import AddTeamsAndPlayers from "./src/screens/AddTeamsAndPlayers";
-import TeamInfoScreen from "./src/screens/TeamInfo";
-
-import { useDispatch } from "react-redux";
-import { setTournaments } from "./src/store/tournamentsSlice";
+import { RootStackParamList } from "./src/types/navigation";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
-
-const StartupLoader = ({ children }: { children: React.ReactNode }) => {
-  const dispatch = useDispatch();
-
-  React.useEffect(() => {
-    const loadTournaments = async () => {
-      try {
-        const json = await AsyncStorage.getItem("tournaments");
-        dispatch(setTournaments(json ? JSON.parse(json) : []));
-      } catch (e) {
-        console.error("Error loading tournaments:", e);
-      }
-    };
-
-    loadTournaments();
-  }, [dispatch]);
-
-  return <>{children}</>;
-};
 
 export default function App() {
   return (
     <Provider store={store}>
-      <StartupLoader>
+      <PersistGate loading={null} persistor={persistor}>
         <NavigationContainer>
           <StatusBar style="auto" />
+
           <Stack.Navigator
             initialRouteName="Home"
             screenOptions={{
@@ -71,7 +49,7 @@ export default function App() {
             <Stack.Screen
               name="AddTeamsAndPlayers"
               component={AddTeamsAndPlayers}
-              options={{ title: "Add Teams and Players" }}
+              options={{ title: "Teams & Players" }}
             />
             <Stack.Screen
               name="Fixtures"
@@ -84,6 +62,11 @@ export default function App() {
               options={{ title: "Scoreboard" }}
             />
             <Stack.Screen
+              name="TeamInfo"
+              component={TeamInfoScreen}
+              options={{ title: "Team Info" }}
+            />
+            <Stack.Screen
               name="History"
               component={HistoryScreen}
               options={{ title: "History" }}
@@ -93,14 +76,9 @@ export default function App() {
               component={SettingsScreen}
               options={{ title: "Settings" }}
             />
-            <Stack.Screen
-              name="TeamInfo"
-              component={TeamInfoScreen}
-              options={{ title: "Team Info" }}
-            />
           </Stack.Navigator>
         </NavigationContainer>
-      </StartupLoader>
+      </PersistGate>
     </Provider>
   );
 }

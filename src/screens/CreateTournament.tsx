@@ -1,116 +1,89 @@
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import React, { useEffect, useLayoutEffect, useState } from "react";
+import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../types/navigation";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
 import {
   addTournament,
-  Team,
   updateTournament,
-} from "../store/tournamentsSlice";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../store";
+} from "../store/slice/tournamentsSlice";
 
 type Props = NativeStackScreenProps<RootStackParamList, "CreateTournament">;
 
 export default function CreateTournament({ navigation, route }: Props) {
   const { id: currTournamentId } = route.params ?? { id: "" };
-  const tournaments = useSelector((state: RootState) => state.tournaments.list);
-  const currTournament = tournaments.find(
-    (tournament) => tournament.id === currTournamentId
-  );
+
+  const tournamentsById = useAppSelector((state) => state.tournaments.byId);
+
+  const currTournament = currTournamentId
+    ? tournamentsById[currTournamentId]
+    : null;
 
   const [name, setName] = useState(currTournament?.name || "");
   const [noOfTeams, setNoOfTeams] = useState(
     currTournament?.noOfTeams?.toString() || "2"
   );
-  // const [tournamentType, setTournamentType] = useState(
-  //   currTournament?.format || "knockout"
-  // );
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
-  const populateTeams = () => {
-    let teams: Team[] = [];
-    if (currTournamentId && currTournament) {
-      if (currTournament?.teams?.length > parseInt(noOfTeams, 10)) {
-        teams = currTournament.teams.slice(0, parseInt(noOfTeams, 10));
-      } else if (currTournament?.teams?.length < parseInt(noOfTeams, 10)) {
-        const additionalTeams = new Array(
-          parseInt(noOfTeams, 10) - currTournament.teams.length
-        )
-          .fill("")
-          .map((_, index) => ({
-            id: Date.now().toString() + index,
-            name: `Team ${currTournament.teams.length + index + 1}`,
-            teamIdx: currTournament.teams.length + index + 1,
-          }));
-        teams = [...currTournament.teams, ...additionalTeams];
-      } else teams = currTournament.teams;
-    } else {
-      teams = new Array(parseInt(noOfTeams, 10) || 0)
-        .fill("")
-        .map((_, index) => ({
-          id: Date.now().toString() + index,
-          name: `Team ${index + 1}`,
-          teamIdx: index + 1,
-        }));
-    }
-    return teams;
-  };
-
-  const addNewTournament = () => {
-    if (!name) {
+  const handleSubmit = () => {
+    if (!name.trim()) {
       alert("Please enter a tournament name.");
       return;
     }
-    if (!noOfTeams) {
-      alert("Please enter a total number of teams. (Min 2)");
+
+    const teamCount = parseInt(noOfTeams, 10);
+    if (isNaN(teamCount) || teamCount < 2) {
+      alert("At least 2 teams required.");
       return;
     }
-    let tournamentData = {
+
+    const tournamentData = {
       id: currTournamentId || Date.now().toString(),
       name,
-      format: "league",
-      teams: populateTeams(),
-      players: currTournament?.players || [],
-      fixtures: currTournament?.fixtures || [],
-      configCompleted: currTournament?.configCompleted || false,
-      noOfTeams: parseInt(noOfTeams, 10),
+      type: currTournament?.type || "league",
+      status: currTournament?.status || "not_started",
+      isConfigCompleted: currTournament?.isConfigCompleted || false,
+      noOfTeams: teamCount,
+      winnerTeamId: null,
+      created_at: currTournament?.created_at || new Date().toISOString(),
     };
+
     if (currTournamentId) {
       dispatch(updateTournament(tournamentData));
     } else {
       dispatch(addTournament(tournamentData));
     }
+
     navigation.navigate("AddTeamsAndPlayers", {
       id: tournamentData.id,
     });
   };
 
-  const numInputHandler = (numInput: string) => {
-    // Only keep digits 0–9
-    let num = numInput.replace(/[^0-9]/g, "");
-    // Prevent empty string
-    if (num === "") {
-      setNoOfTeams("");
-      return;
-    }
-    const numberValue = parseInt(num, 10);
-    // Enforce min
-    if (numberValue < 2) {
+  /** input sanitization for team count */
+  const numInputHandler = (value: string) => {
+    const cleaned = value.replace(/[^0-9]/g, "");
+
+    if (!cleaned) {
       setNoOfTeams("2");
       return;
     }
-    setNoOfTeams(numberValue.toString());
+
+    const num = parseInt(cleaned, 10);
+    setNoOfTeams(num < 2 ? "2" : num.toString());
   };
 
+  /** Back button override */
   useEffect(() => {
-    navigation.addListener("beforeRemove", (e) => {
-      e.preventDefault(); // block default back
+    const sub = navigation.addListener("beforeRemove", (e) => {
+      e.preventDefault();
       navigation.navigate("Home");
     });
+
+    return sub;
   }, [navigation]);
 
+  /** Dynamic header title */
   useLayoutEffect(() => {
     navigation.setOptions({
       title: currTournamentId ? "Edit Tournament" : "Create Tournament",
@@ -122,47 +95,28 @@ export default function CreateTournament({ navigation, route }: Props) {
       <Text className="mb-2 font-semibold text-gray-600">Tournament Name</Text>
       <TextInput
         className="border border-gray-300 p-3 rounded-2xl mb-5"
-        placeholder="Enter name"
+        placeholder="Enter tournament name"
         value={name}
         onChangeText={setName}
       />
+
       <Text className="mb-2 font-semibold text-gray-600">Number of Teams</Text>
       <TextInput
         className="border border-gray-300 p-3 rounded-2xl mb-2"
-        placeholder="Enter number of teams"
         value={noOfTeams}
         onChangeText={numInputHandler}
         keyboardType="numeric"
         inputMode="numeric"
       />
-      <Text className="mb-5 font-medium text-sm text-gray-600">
-        Note: At least 2 teams required
+
+      <Text className="text-gray-500 text-sm mb-6">
+        Minimum 2 teams required
       </Text>
-      {/* <Text className="mb-2 font-semibold text-gray-600">Select Format</Text> */}
-      {/* <View className="flex-row mb-5">
-        {["knockout", "league"].map((type) => (
-          <TouchableOpacity
-            key={type}
-            className={`flex-1 mx-1 p-3 rounded-2xl ${
-              type === tournamentType ? "bg-gray-800" : "bg-gray-200"
-            }`}
-            onPress={() => setTournamentType(type)}
-            activeOpacity={1}
-          >
-            <Text
-              className={`text-center font-semibold ${
-                type === tournamentType ? "text-white" : "text-gray-700"
-              }`}
-            >
-              {type === "knockout" ? "Knockout" : "League"}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View> */}
+
       <TouchableOpacity
         className="bg-gray-800 py-3 rounded-2xl"
-        onPress={addNewTournament}
-        activeOpacity={1}
+        onPress={handleSubmit}
+        activeOpacity={0.9}
       >
         <Text className="text-center text-white text-lg font-semibold">
           Next: Add Teams
