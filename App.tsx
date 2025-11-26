@@ -11,7 +11,8 @@ import { StatusBar } from "expo-status-bar";
 
 import HomeScreen from "./src/screens/Home";
 import CreateTournamentScreen from "./src/screens/CreateTournament";
-import AddTeamsAndPlayers from "./src/screens/AddTeamsAndPlayers";
+import AddTeamsScreen from "./src/screens/AddTeams";
+import AddPlayersScreen from "./src/screens/AddPlayers";
 import FixturesScreen from "./src/screens/Fixtures";
 import ScoreboardScreen from "./src/screens/Scoreboard";
 import TeamInfoScreen from "./src/screens/TeamInfo";
@@ -47,16 +48,21 @@ export default function App() {
               options={{ title: "Create Tournament" }}
             />
             <Stack.Screen
-              name="AddTeamsAndPlayers"
-              component={AddTeamsAndPlayers}
-              options={{ title: "Teams & Players" }}
+              name="AddTeams"
+              component={AddTeamsScreen}
+              options={{ title: "Add Teams" }}
+            />
+            <Stack.Screen
+              name="AddPlayers"
+              component={AddPlayersScreen}
+              options={{ title: "Add Players" }}
             />
             <Stack.Screen
               name="Fixtures"
               component={FixturesScreen}
               options={{ title: "Match Schedule" }}
             />
-            <Stack.Screen
+            {/*<Stack.Screen
               name="Scoreboard"
               component={ScoreboardScreen}
               options={{ title: "Scoreboard" }}
@@ -65,7 +71,7 @@ export default function App() {
               name="TeamInfo"
               component={TeamInfoScreen}
               options={{ title: "Team Info" }}
-            />
+            /> */}
             <Stack.Screen
               name="History"
               component={HistoryScreen}

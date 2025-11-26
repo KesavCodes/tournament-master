@@ -55,7 +55,7 @@ export default function CreateTournament({ navigation, route }: Props) {
       dispatch(addTournament(tournamentData));
     }
 
-    navigation.navigate("AddTeamsAndPlayers", {
+    navigation.navigate("AddTeams", {
       id: tournamentData.id,
     });
   };
