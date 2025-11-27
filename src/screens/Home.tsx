@@ -12,7 +12,10 @@ export default function Home({ navigation }: Props) {
 
   const tournaments = tournamentIds
     .map((id) => tournamentsById[id])
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    .sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
 
   return (
     <View className="flex-1 bg-gray-100 px-3 pt-6">
@@ -20,6 +23,7 @@ export default function Home({ navigation }: Props) {
       <TouchableOpacity
         className="bg-gray-800 px-12 py-3 rounded-2xl mb-5 self-center w-3/4"
         onPress={() => navigation.navigate("CreateTournament", { id: "" })}
+        activeOpacity={1}
       >
         <Text className="text-white text-2xl font-semibold text-center">
           Create Tournament
@@ -35,10 +39,13 @@ export default function Home({ navigation }: Props) {
           </Text>
 
           <TouchableOpacity
+            activeOpacity={1}
             className="bg-gray-500 px-4 py-2 rounded-2xl"
             onPress={() => navigation.navigate("History")}
           >
-            <Text className="text-lg text-white font-semibold">Full History</Text>
+            <Text className="text-lg text-white font-semibold">
+              Full History
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -56,6 +63,7 @@ export default function Home({ navigation }: Props) {
           renderItem={({ item }) => (
             <TouchableOpacity
               className="bg-gray-800 rounded-2xl mx-4 my-2 px-4 py-6"
+              activeOpacity={1}
               onPress={() =>
                 item.isConfigCompleted
                   ? navigation.navigate("Fixtures", { id: item.id })

@@ -23,14 +23,24 @@ import {
   bulkUpsertTournamentTeams,
 } from "../store/slice/tournamentTeamsSlice";
 import { generateCoolTeamNames } from "../utils/generateRandomTeamName";
-import { Team as TeamType, TournamentTeam as TournamentTeamType } from "../types";
+import {
+  Team as TeamType,
+  TournamentTeam as TournamentTeamType,
+} from "../types";
 
 type Props = NativeStackScreenProps<RootStackParamList, "AddTeams">;
 
 const DEFAULT_PALETTE = [
-  "#EF4444", "#3B82F6", "#10B981", "#F59E0B",
-  "#8B5CF6", "#EC4899", "#F97316", "#06B6D4",
-  "#374151", "#0EA5A4",
+  "#EF4444",
+  "#3B82F6",
+  "#10B981",
+  "#F59E0B",
+  "#8B5CF6",
+  "#EC4899",
+  "#F97316",
+  "#06B6D4",
+  "#374151",
+  "#0EA5A4",
 ];
 
 function randomColorFromPalette(palette: string[]) {
@@ -65,7 +75,9 @@ export default function AddTeamsScreen({ navigation, route }: Props) {
 
   // color picker modal state
   const [colorModalVisible, setColorModalVisible] = useState(false);
-  const [colorModalTargetIndex, setColorModalTargetIndex] = useState<number | null>(null);
+  const [colorModalTargetIndex, setColorModalTargetIndex] = useState<
+    number | null
+  >(null);
   const [hexInput, setHexInput] = useState<string>("");
 
   // on mount: build initial localTeams from existing tournamentTeams or create dummies
@@ -76,14 +88,12 @@ export default function AddTeamsScreen({ navigation, route }: Props) {
 
     // prefer tournamentTeams -> resolve their global_team_id to full team object
     if (existingTTs.length > 0) {
-      const resolved = existingTTs
-        .slice(0, expectedCount)
-        .map((tt, idx) => {
-          const global = teamsById[tt.global_team_id];
-          if (global) return { ...global };
-          // fallback dummy
-          return makeDummyTeam(idx);
-        });
+      const resolved = existingTTs.slice(0, expectedCount).map((tt, idx) => {
+        const global = teamsById[tt.global_team_id];
+        if (global) return { ...global };
+        // fallback dummy
+        return makeDummyTeam(idx);
+      });
 
       // if tournament was expanded after creation, add more
       while (resolved.length < expectedCount) {
@@ -114,7 +124,9 @@ export default function AddTeamsScreen({ navigation, route }: Props) {
   // generate cool names
   const onGenerateCoolNames = () => {
     const names = generateCoolTeamNames(localTeams.length);
-    setLocalTeams((prev) => prev.map((t, i) => ({ ...t, name: names[i] ?? t.name })));
+    setLocalTeams((prev) =>
+      prev.map((t, i) => ({ ...t, name: names[i] ?? t.name }))
+    );
   };
 
   // open color modal
@@ -133,54 +145,56 @@ export default function AddTeamsScreen({ navigation, route }: Props) {
   };
 
   // Save: create global team records and tournamentTeam records (one-to-one)
-const saveTeams = () => {
-  if (!tournament) {
-    Alert.alert("Error", "Tournament not found.");
-    return;
-  }
+  const saveTeams = () => {
+    if (!tournament) {
+      Alert.alert("Error", "Tournament not found.");
+      return;
+    }
 
-  if (localTeams.length !== expectedCount) {
-    Alert.alert("Error", `Expected ${expectedCount} teams. Current: ${localTeams.length}`);
-    return;
-  }
+    if (localTeams.length !== expectedCount) {
+      Alert.alert(
+        "Error",
+        `Expected ${expectedCount} teams. Current: ${localTeams.length}`
+      );
+      return;
+    }
 
-  // 1️⃣ Normalize & upsert all teams into teamsSlice
-  const normalizedTeams = localTeams.map((team) => {
-    const existing = teamsById[team.id];
-    return {
-      id: existing ? existing.id : team.id, // stable id
-      name: team.name.trim(),
-      color: team.color,
-      logo_url: team.logo_url ?? null,
-      created_at: existing?.created_at ?? new Date().toISOString(),
-    };
-  });
+    // 1️⃣ Normalize & upsert all teams into teamsSlice
+    const normalizedTeams = localTeams.map((team) => {
+      const existing = teamsById[team.id];
+      return {
+        id: existing ? existing.id : team.id, // stable id
+        name: team.name.trim(),
+        color: team.color,
+        logo_url: team.logo_url ?? null,
+        created_at: existing?.created_at ?? new Date().toISOString(),
+      };
+    });
 
-  // Bulk upsert teams into global slice
-  dispatch(bulkUpsertTeams(normalizedTeams));
+    // Bulk upsert teams into global slice
+    dispatch(bulkUpsertTeams(normalizedTeams));
 
-  // 2️⃣ Create TournamentTeam records (one per team)
-  const ttRecords: TournamentTeamType[] = normalizedTeams.map((t, index) => {
-    // Check if TT already exists for this team
-    const existingTT = Object.values(tournamentTeamsById).find(
-      (tt) => tt.tournament_id === tournamentId && tt.global_team_id === t.id
-    );
+    // 2️⃣ Create TournamentTeam records (one per team)
+    const ttRecords: TournamentTeamType[] = normalizedTeams.map((t, index) => {
+      // Check if TT already exists for this team
+      const existingTT = Object.values(tournamentTeamsById).find(
+        (tt) => tt.tournament_id === tournamentId && tt.global_team_id === t.id
+      );
 
-    return {
-      id: existingTT ? existingTT.id : Date.now().toString() + "-tt-" + index,
-      tournament_id: tournamentId,
-      global_team_id: t.id,
-      players: existingTT?.players ?? [],
-      created_at: existingTT?.created_at ?? new Date().toISOString(),
-    };
-  });
+      return {
+        id: existingTT ? existingTT.id : Date.now().toString() + "-tt-" + index,
+        tournament_id: tournamentId,
+        global_team_id: t.id,
+        players: existingTT?.players ?? [],
+        created_at: existingTT?.created_at ?? new Date().toISOString(),
+      };
+    });
 
-  dispatch(bulkUpsertTournamentTeams(ttRecords));
+    dispatch(bulkUpsertTournamentTeams(ttRecords));
 
-  // 3️⃣ Navigate to the next screen
-  navigation.navigate("AddPlayers", { id: tournamentId });
-};
-
+    // 3️⃣ Navigate to the next screen
+    navigation.navigate("AddPlayers", { id: tournamentId });
+  };
 
   // When user goes back and changes number in CreateTournament, we must reconcile.
   // Since CreateTournament updates tournament.noOfTeams, AddTeams is remounted and localTeams effect runs again.
@@ -188,21 +202,31 @@ const saveTeams = () => {
 
   return (
     <View className="flex-1 bg-gray-100 p-4">
-      <Text className="text-2xl font-bold mb-4">Setup Teams ({expectedCount})</Text>
+      <Text className="text-2xl font-bold mb-4">
+        Setup Teams ({expectedCount})
+      </Text>
 
       <View className="flex-row justify-end mb-3">
         <TouchableOpacity
+          activeOpacity={1}
           className="bg-gray-800 px-3 py-2 rounded-2xl mr-2"
           onPress={onGenerateCoolNames}
         >
-          <Text className="text-white font-semibold">Generate Cool Team Names</Text>
+          <Text className="text-white font-semibold">
+            Generate Cool Team Names
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           className="bg-gray-500 px-3 py-2 rounded-2xl"
           onPress={() => {
             // refill with new random colors while keeping names
-            setLocalTeams((prev) => prev.map((t) => ({ ...t, color: randomColorFromPalette(DEFAULT_PALETTE) })));
+            setLocalTeams((prev) =>
+              prev.map((t) => ({
+                ...t,
+                color: randomColorFromPalette(DEFAULT_PALETTE),
+              }))
+            );
           }}
         >
           <Text className="text-white font-semibold">Randomize Colors</Text>
@@ -255,7 +279,13 @@ const saveTeams = () => {
                 <Pressable
                   key={c}
                   onPress={() => applyColorFromModal(c)}
-                  style={{ backgroundColor: c, width: 44, height: 44, borderRadius: 10, margin: 6 }}
+                  style={{
+                    backgroundColor: c,
+                    width: 44,
+                    height: 44,
+                    borderRadius: 10,
+                    margin: 6,
+                  }}
                 />
               ))}
             </View>
@@ -277,7 +307,9 @@ const saveTeams = () => {
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => {
-                  let hex = hexInput.startsWith("#") ? hexInput : `#${hexInput}`;
+                  let hex = hexInput.startsWith("#")
+                    ? hexInput
+                    : `#${hexInput}`;
                   applyColorFromModal(hex);
                 }}
                 className="px-4 py-2 rounded-2xl bg-gray-800"

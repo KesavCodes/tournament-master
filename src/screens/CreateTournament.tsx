@@ -116,7 +116,7 @@ export default function CreateTournament({ navigation, route }: Props) {
       <TouchableOpacity
         className="bg-gray-800 py-3 rounded-2xl"
         onPress={handleSubmit}
-        activeOpacity={0.9}
+        activeOpacity={1}
       >
         <Text className="text-center text-white text-lg font-semibold">
           Next: Add Teams

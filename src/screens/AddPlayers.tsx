@@ -19,6 +19,9 @@ import {
   // addTournamentTeam,
 } from "../store/slice/tournamentTeamsSlice";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { generateRoundRobinFixtures } from "../utils/generateFixture";
+import { updateTournament } from "../store/slice/tournamentsSlice";
+import { bulkUpsertFixtures } from "../store/slice/fixturesSlice";
 
 type Props = NativeStackScreenProps<RootStackParamList, "AddPlayers">;
 
@@ -157,21 +160,17 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
 
   // proceed: persist players (global) and update tournamentTeam.players arrays
   const proceed = () => {
-    // validate: at least one player and every player has teamId
     if (localPlayers.length === 0) {
       Alert.alert("Add players", "Please add at least 1 player.");
       return;
     }
     const unassigned = localPlayers.some((p) => !p.teamId);
     if (unassigned) {
-      Alert.alert(
-        "Assign teams",
-        "Please assign a team to every player (or use Randomize Teams)."
-      );
+      Alert.alert("Assign teams", "Please assign a team to every player.");
       return;
     }
 
-    // 1. create player records (global players)
+    // 1. Save global players
     const playersToCreate = localPlayers.map((p) => ({
       id: p.id,
       name: p.name,
@@ -180,24 +179,37 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
     }));
     dispatch(bulkUpsertPlayers(playersToCreate));
 
-    // 2. update each tournamentTeam players[] with assigned player ids
-    // We'll build a mapping ttId -> playerIds[]
+    // 2. Update tournamentTeam.players array
     const ttMap: Record<string, string[]> = {};
     localPlayers.forEach((p) => {
       const ttid = p.teamId!;
       if (!ttMap[ttid]) ttMap[ttid] = [];
       ttMap[ttid].push(p.id);
     });
-
-    // For each tournamentTeam record, we will set players to the mapped array
     tournamentTeams.forEach((tt) => {
-      const newPlayers = ttMap[tt.id] ?? [];
-      // use updateTournamentTeam action to set players
-      dispatch(updateTournamentTeam({ ...tt, players: newPlayers }));
+      dispatch(updateTournamentTeam({ ...tt, players: ttMap[tt.id] || [] }));
     });
 
-    // Mark tournament as config completed
-    // dispatch(updateTournament(...)) // if you have a tournament update action; otherwise handle elsewhere
+    // 3. Generate round-robin fixtures
+    const fixturesRaw = generateRoundRobinFixtures(tournamentTeams);
+
+    dispatch(
+      bulkUpsertFixtures(
+        fixturesRaw.map((fixture, index) => ({
+          ...fixture,
+          tournament_id: tournamentId,
+          created_at: new Date().toISOString() + index.toString(),
+        }))
+      )
+    );
+
+    // 5. Update config status
+    dispatch(
+      updateTournament({
+        ...tournament,
+        isConfigCompleted: true,
+      })
+    );
 
     navigation.navigate("Fixtures", { id: tournamentId });
   };
@@ -281,7 +293,10 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
           <View className="bg-white rounded-2xl p-3 mb-3">
             <View className="flex-row justify-between items-center mb-2">
               <Text className="font-semibold text-gray-800">{item.name}</Text>
-              <TouchableOpacity activeOpacity={1} onPress={() => removeLocalPlayer(item.id)}>
+              <TouchableOpacity
+                activeOpacity={1}
+                onPress={() => removeLocalPlayer(item.id)}
+              >
                 <Ionicons name="trash-bin" size={20} color="#ff3838ff" />
               </TouchableOpacity>
             </View>

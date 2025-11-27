@@ -5,14 +5,23 @@ import {
   FlatList,
   Alert,
   Modal,
+  TextInput,
 } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../types/navigation";
-import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store";
-import { updateTournament } from "../store/tournamentsSlice";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import {
+  selectFixturesByTournament,
+} from "../store/helpers/selector";
+import { Fixture } from "../types";
+import {
+  attachTeamNames,
+  FixturesWithTeamNames,
+} from "./../utils/attachTeamNames";
+import { bulkUpsertFixtures } from "../store/slice/fixturesSlice";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Fixtures">;
 
@@ -24,114 +33,168 @@ export default function Fixtures({ navigation, route }: Props) {
     id: string;
     teamA: string;
     teamB: string;
+    teamAId: string;
+    teamBId: string;
+    teamAScore?: string;
+    teamBScore?: string;
   } | null>(null);
 
-  const tournaments = useSelector((state: RootState) => state.tournaments.list);
-  const dispatch = useDispatch();
-
-  const currTournament = tournaments.find(
-    (tournament) => tournament.id === currTournamentId
+  const currTournamentFixtures = useAppSelector(
+    (state: RootState): Fixture[] =>
+      selectFixturesByTournament(
+        state,
+        currTournamentId
+      ) as unknown as Fixture[]
   );
-  if (!currTournament) navigation.navigate("Home");
+  const teamsById = useAppSelector((state: RootState) => state.teams.byId);
+  const dispatch = useAppDispatch();
+
+  if (!currTournamentFixtures || currTournamentFixtures.length === 0)
+    navigation.navigate("Home");
+
   const matchResultHandler = (matchId: string) => {
-    const matchIndex = currTournament?.fixtures.findIndex(
-      (m) => m.id === matchId
-    );
-    if (matchIndex === undefined || matchIndex < 0 || !currTournament) return;
+    const match = currTournamentFixtures.find((m) => m.id === matchId);
+    if (!match) return;
+    console.log(match, "--match");
+    console.log(teamsById);
+    setSelectedMatch({
+      id: match.id,
+      teamA: teamsById[match.teamAId].name,
+      teamB: teamsById[match.teamBId].name,
+      teamAId: match.teamAId,
+      teamBId: match.teamBId,
+      teamAScore: match.teamAScore?.toString() || "",
+      teamBScore: match.teamBScore?.toString() || "",
+    });
+
     setShowModal(true);
-    setSelectedMatch(currTournament.fixtures[matchIndex]);
   };
 
-  const onResultRecorded = (winningTeam: string) => {
-    const currMatchIndex = currTournament?.fixtures.findIndex(
-      (m) => m.id === selectedMatch?.id
-    );
-    if (currMatchIndex === undefined || currMatchIndex < 0 || !currTournament)
+  // -------------------------
+  // SAVE SCORES + DETERMINE WINNER
+  // -------------------------
+  const submitScore = () => {
+    if (!selectedMatch) return;
+
+    const aScore = parseInt(selectedMatch.teamAScore || "0", 10);
+    const bScore = parseInt(selectedMatch.teamBScore || "0", 10);
+
+    // validation
+    if (isNaN(aScore) || isNaN(bScore)) {
+      Alert.alert("Invalid score", "Please enter valid scores.");
       return;
-    const updatedFixtures = [...currTournament.fixtures];
-    updatedFixtures[currMatchIndex] = {
-      ...updatedFixtures[currMatchIndex],
-      result: winningTeam,
-    };
-    dispatch(
-      updateTournament({
-        ...currTournament,
-        fixtures: updatedFixtures,
-      })
+    }
+
+    if (aScore === bScore) {
+      Alert.alert("Invalid result", "Scores cannot be equal.");
+      return;
+    }
+
+    const winner =
+      aScore > bScore ? selectedMatch.teamAId : selectedMatch.teamBId;
+
+    const updatedFixtures = currTournamentFixtures.map((match) =>
+      match.id === selectedMatch.id
+        ? {
+            ...match,
+            teamAScore: aScore,
+            teamBScore: bScore,
+            winnerId: winner,
+          }
+        : match
     );
+
+    dispatch(bulkUpsertFixtures(updatedFixtures));
+
     setShowModal(false);
   };
 
+  const canNavigateToFinals = currTournamentFixtures.every(
+    (match) => match.winnerId !== undefined
+  );
+
+  React.useEffect(() => {
+    const unsubscribe = navigation.addListener("beforeRemove", (e) => {
+      e.preventDefault();
+      navigation.navigate("Home");
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
+  console.log(currTournamentFixtures, "check")
   return (
     <View className="flex-1 bg-white p-5">
+      {/* ---------------- MODAL FOR SCORE ENTRY ---------------- */}
       <Modal
         visible={showModal}
-        animationType="slide"
+        animationType="fade"
         transparent
-        onDismiss={() => setShowModal(false)}
-        statusBarTranslucent
         onRequestClose={() => setShowModal(false)}
       >
         <TouchableOpacity
-          className="flex-1 justify-center items-center p-5"
+          className="flex-1 bg-black/40 justify-center items-center p-5"
+          activeOpacity={1}
           onPress={() => setShowModal(false)}
         >
           <TouchableOpacity
             activeOpacity={1}
-            onPress={(e) => {
-              e.stopPropagation();
-            }}
-            className="bg-gray-200 rounded-2xl w-full border overflow-hidden"
+            onPress={(e) => e.stopPropagation()}
+            className="bg-white w-full rounded-2xl p-4"
           >
-            <View className="mb-4 bg-gray-800 pt-4 px-3">
-              <View className="flex flex-row justify-between items-center">
-                <Text className="text-2xl font-bold text-white text-center flex-1">
-                  Record Result
-                </Text>
-                <Ionicons
-                  name="close-circle-outline"
-                  color="white"
-                  size={24}
-                  onPress={() => setShowModal(false)}
-                />
-              </View>
-              <View className="flex flex-row items-center gap-4 my-4">
-                <Text
-                  className="text-white text-lg font-semibold w-[42%]"
-                  numberOfLines={1}
-                >
-                  {selectedMatch?.teamA}
-                </Text>
-                <Text className="text-lg font-semibold text-red-500">vs</Text>
-                <Text
-                  className="text-white text-lg font-semibold w-[42%]"
-                  numberOfLines={1}
-                >
-                  {selectedMatch?.teamB}
-                </Text>
-              </View>
+            <View className="flex-row justify-between mb-4">
+              <Text className="text-2xl font-bold flex-1 text-center">
+                Record Result
+              </Text>
+              <Ionicons
+                name="close-circle-outline"
+                color="black"
+                size={26}
+                onPress={() => setShowModal(false)}
+              />
             </View>
-            <View className="flex flex-row justify-between pb-4 px-3">
-              <TouchableOpacity
-                className="bg-gray-800 rounded-2xl p-3 mb-3 w-[48%]"
-                onPress={() => onResultRecorded(selectedMatch?.teamA!!)}
-              >
-                <Text className="text-white text-center" numberOfLines={1}>
-                  {selectedMatch?.teamA}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                className="bg-gray-800 rounded-2xl p-3 mb-3 w-[48%]"
-                onPress={() => onResultRecorded(selectedMatch?.teamB!!)}
-              >
-                <Text className="text-white text-center" numberOfLines={1}>
-                  {selectedMatch?.teamB}
-                </Text>
-              </TouchableOpacity>
-            </View>
+
+            {/* TEAM A */}
+            <Text className="text-lg font-semibold mb-1">
+              {selectedMatch?.teamA}
+            </Text>
+            <TextInput
+              className="border border-gray-400 rounded-xl p-3 text-lg mb-4"
+              keyboardType="numeric"
+              value={selectedMatch?.teamAScore}
+              placeholder="Score"
+              onChangeText={(txt) =>
+                setSelectedMatch((p) => ({ ...p!, teamAScore: txt }))
+              }
+            />
+
+            {/* TEAM B */}
+            <Text className="text-lg font-semibold mb-1">
+              {selectedMatch?.teamB}
+            </Text>
+            <TextInput
+              className="border border-gray-400 rounded-xl p-3 text-lg mb-4"
+              keyboardType="numeric"
+              value={selectedMatch?.teamBScore}
+              placeholder="Score"
+              onChangeText={(txt) =>
+                setSelectedMatch((p) => ({ ...p!, teamBScore: txt }))
+              }
+            />
+
+            <TouchableOpacity
+              onPress={submitScore}
+              className="bg-gray-800 rounded-2xl p-4 mt-2"
+            >
+              <Text className="text-white text-center font-semibold text-lg">
+                Save Result
+              </Text>
+            </TouchableOpacity>
           </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
+
+      {/* ---------------- ACTION BUTTONS ---------------- */}
       <View className="flex flex-row justify-between pb-4">
         <TouchableOpacity
           className="bg-gray-800 rounded-2xl p-3 mb-3 w-[48%]"
@@ -139,63 +202,98 @@ export default function Fixtures({ navigation, route }: Props) {
             navigation.navigate("Scoreboard", { id: currTournamentId })
           }
         >
-          <Text
-            className="text-white text-center text-lg font-semibold"
-            numberOfLines={1}
-          >
+          <Text className="text-white text-center text-lg font-semibold">
             Scoreboard
           </Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           className="bg-gray-800 rounded-2xl p-3 mb-3 w-[48%]"
-                    onPress={() =>
+          onPress={() =>
             navigation.navigate("TeamInfo", { id: currTournamentId })
           }
         >
-          <Text
-            className="text-white text-center text-lg font-semibold"
-            numberOfLines={1}
-          >
-            Teams Info
+          <Text className="text-white text-center text-lg font-semibold">
+            Team Info
           </Text>
         </TouchableOpacity>
       </View>
+
       <Text className="text-2xl font-bold mb-4 text-center">Fixtures</Text>
+
+      {/* ---------------- FIXTURE LIST ---------------- */}
       <FlatList
-        data={currTournament?.fixtures ?? []}
+        data={
+          (attachTeamNames(currTournamentFixtures, teamsById) ??
+            []) as unknown as FixturesWithTeamNames[]
+        }
         keyExtractor={(m) => m.id}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            className="border bg-gray-100 border-gray-200 rounded-2xl p-3 mb-3 flex flex-row items-center justify-between"
-            onPress={() => matchResultHandler(item.id)}
-            activeOpacity={0.4}
-            // disabled
-          >
-            <View className="gap-2">
-              <View className="flex flex-row gap-2 mb-2">
-                <Text className="font-semibold w-[42%]" numberOfLines={1}>
-                  {item.teamA}
-                </Text>
-                <Text className="font-bold text-red-500">vs</Text>
+        renderItem={({ item }) => {
+          const hasResult = item.winnerId !== undefined;
+          const teamAWin = hasResult && item.winnerId === item.teamAId;
+          const teamBWin = hasResult && item.winnerId === item.teamBId;
+
+          return (
+            <TouchableOpacity
+              className="border bg-gray-100 border-gray-200 rounded-2xl p-3 mb-3"
+              onPress={() => matchResultHandler(item.id)}
+              activeOpacity={0.7}
+            >
+              {/* TEAM ROW */}
+              <View className="flex flex-row justify-between mb-2">
+                {/* TEAM A */}
                 <Text
-                  className="font-semibold w-[42%] truncate ml-4"
+                  className={`w-[49%] border-0 border-r-2 pr-2 text-base ${
+                    teamAWin ? "font-bold text-green-600" : "text-gray-700"
+                  }`}
                   numberOfLines={1}
                 >
-                  {item.teamB}
+                  {item.teamA} {teamAWin ? "🏆" : ""}
+                </Text>
+
+                {/* TEAM B */}
+                <Text
+                  className={`w-[49%] text-right text-base ${
+                    teamBWin ? "font-bold text-green-600" : "text-gray-700"
+                  }`}
+                  numberOfLines={1}
+                >
+                  {item.teamB} {teamBWin ? "🏆" : ""}
                 </Text>
               </View>
-              <Text className="text-gray-500 w-[85%]" numberOfLines={1} >
-                {item.result
-                  ? `${item.result} Wins 🏆`
-                  : "Tap to record result"}
-              </Text>
-            </View>
-            <View>
-              <Ionicons name="chevron-forward-outline" size={20} color="gray" />
-            </View>
-          </TouchableOpacity>
-        )}
+
+              {/* INLINE SCORE BADGE */}
+              {hasResult &&
+              item.teamAScore !== undefined &&
+              item.teamBScore !== undefined ? (
+                <View className="bg-gray-800 rounded-xl px-3 py-2 self-start">
+                  <Text className="text-white font-semibold">
+                    {item.teamA} {item.teamAScore} - {item.teamBScore}{" "}
+                    {item.teamB}
+                  </Text>
+                </View>
+              ) : (
+                <Text className="text-gray-500">Tap to record result</Text>
+              )}
+            </TouchableOpacity>
+          );
+        }}
       />
+
+      {/* ---------------- PROCEED BUTTON ---------------- */}
+      <TouchableOpacity
+        className={`rounded-2xl p-3 mt-3 ${
+          !canNavigateToFinals ? "bg-gray-400" : "bg-gray-800"
+        }`}
+        disabled={!canNavigateToFinals}
+        onPress={() =>
+          navigation.navigate("TeamInfo", { id: currTournamentId })
+        }
+      >
+        <Text className="text-white text-center text-lg font-semibold">
+          Proceed to Knockouts
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }

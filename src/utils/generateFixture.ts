@@ -1,28 +1,57 @@
-export const generateFixture = (
-  teams: { id: string; name: string; teamIdx: number }[]
-) => {
-  let allMatches: any[] = [];
-  for (let i = 0; i < teams.length; i++) {
-    for (let j = i + 1; j < teams.length; j++) {
-      allMatches.push({
-        id: `${Number(teams[i].id) + Number(teams[j].id) + teams[i].teamIdx}`,
-        teamA: teams[i].name,
-        teamB: teams[j].name,
-      });
+import { TournamentTeam } from "../types";
+
+export function generateRoundRobinFixtures(teams: TournamentTeam[]) {
+  let teamList = [...teams];
+
+  const isOdd = teamList.length % 2 !== 0;
+  if (isOdd) {
+    // Add bye team
+    teamList.push({
+      id: "BYE",
+      global_team_id: "BYE",
+      players: [],
+      tournament_id: teams[0].tournament_id,
+      created_at: new Date().toISOString(),
+    });
+  }
+
+  const n = teamList.length;
+  const rounds = n - 1;
+  const half = n / 2;
+
+  let schedule: {
+    teamAId: string;
+    teamBId: string;
+    matchNumber: number;
+    round: number;
+    id: string;
+  }[] = [];
+
+  let arr = [...teamList];
+
+  for (let round = 1; round <= rounds; round++) {
+    for (let i = 0; i < half; i++) {
+      const teamA = arr[i];
+      const teamB = arr[n - 1 - i];
+
+      // ignore BYE matches
+      if (teamA.id !== "BYE" && teamB.id !== "BYE") {
+        schedule.push({
+          id: `fix-${round}-${i}-${Date.now()}`,
+          teamAId: teamA.global_team_id,
+          teamBId: teamB.global_team_id,
+          matchNumber: schedule.length + 1,
+          round,
+        });
+      }
     }
+
+    // rotate except first element
+    const fixed = arr[0];
+    const rotated = arr.slice(1);
+    rotated.unshift(rotated.pop()!);
+    arr = [fixed, ...rotated];
   }
-  // sort matches to alternate between teams
-  allMatches = allMatches.sort((a, b) => Number(a.id) - Number(b.id));
-  const matchFixtures = [];
-  let p1 = 0;
-  let p2 = allMatches.length - 1;
-  while (p1 < p2) {
-    matchFixtures.push(allMatches[p1], allMatches[p2]);
-    p1++;
-    p2--;
-  }
-  if (p1 === p2) {
-    matchFixtures.push(allMatches[p1]);
-  }
-  return matchFixtures;
-};
+
+  return schedule;
+}
