@@ -62,7 +62,7 @@ export default function App() {
               component={FixturesScreen}
               options={{ title: "Match Schedule" }}
             />
-            {/*<Stack.Screen
+            <Stack.Screen
               name="Scoreboard"
               component={ScoreboardScreen}
               options={{ title: "Scoreboard" }}
@@ -71,7 +71,7 @@ export default function App() {
               name="TeamInfo"
               component={TeamInfoScreen}
               options={{ title: "Team Info" }}
-            /> */}
+            />
             <Stack.Screen
               name="History"
               component={HistoryScreen}

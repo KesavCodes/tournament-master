@@ -13,9 +13,7 @@ import { RootStackParamList } from "../types/navigation";
 import { RootState } from "../store";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import {
-  selectFixturesByTournament,
-} from "../store/helpers/selector";
+import { selectFixturesByTournament } from "../store/helpers/selector";
 import { Fixture } from "../types";
 import {
   attachTeamNames,
@@ -49,14 +47,14 @@ export default function Fixtures({ navigation, route }: Props) {
   const teamsById = useAppSelector((state: RootState) => state.teams.byId);
   const dispatch = useAppDispatch();
 
-  if (!currTournamentFixtures || currTournamentFixtures.length === 0)
-    navigation.navigate("Home");
+  useEffect(() => {
+    if (!currTournamentFixtures || currTournamentFixtures.length === 0)
+      navigation.navigate("Home");
+  }, [currTournamentFixtures.length, navigation]);
 
   const matchResultHandler = (matchId: string) => {
     const match = currTournamentFixtures.find((m) => m.id === matchId);
     if (!match) return;
-    console.log(match, "--match");
-    console.log(teamsById);
     setSelectedMatch({
       id: match.id,
       teamA: teamsById[match.teamAId].name,
@@ -122,7 +120,7 @@ export default function Fixtures({ navigation, route }: Props) {
     return unsubscribe;
   }, [navigation]);
 
-  console.log(currTournamentFixtures, "check")
+  console.log(currTournamentFixtures, "check");
   return (
     <View className="flex-1 bg-white p-5">
       {/* ---------------- MODAL FOR SCORE ENTRY ---------------- */}

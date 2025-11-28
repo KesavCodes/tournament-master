@@ -1,37 +1,43 @@
-import { Fixture } from "../store/tournamentsSlice";
+import { FixturesWithTeamNames } from "./attachTeamNames";
 
-export const generateScoreboard = (matches: Fixture[]) => {
+export const generateScoreboard = (matches: FixturesWithTeamNames[]) => {
   const scoreboard: {
     [key: string]: {
       played: number;
       won: number;
+      name: string;
     };
   } = {};
 
-  matches.forEach((match: Fixture) => {
-    const { teamA, teamB, result } = match;
-    if (!scoreboard[teamA]) {
-      scoreboard[teamA] = {
+  matches.forEach((match: FixturesWithTeamNames) => {
+    const { teamA, teamAId, teamB, teamBId, winnerId } = match;
+    if (!scoreboard[teamAId]) {
+      scoreboard[teamAId] = {
         played: 0,
         won: 0,
+        name: teamA,
       };
     }
-    if (!scoreboard[teamB]) {
-      scoreboard[teamB] = {
+    if (!scoreboard[teamBId]) {
+      scoreboard[teamBId] = {
         played: 0,
         won: 0,
+        name: teamB,
       };
     }
-    if (result) {
-      scoreboard[teamA].played += 1;
-      scoreboard[teamB].played += 1;
-      if (result === teamA) scoreboard[teamA].won += 1;
-      else if (result === teamB) scoreboard[teamB].won += 1;
+    if (winnerId) {
+      scoreboard[teamAId].played += 1;
+      scoreboard[teamBId].played += 1;
+      if (winnerId === teamAId) scoreboard[teamAId].won += 1;
+      else if (winnerId === teamBId) scoreboard[teamBId].won += 1;
     }
   });
 
-  return Object.entries(scoreboard).map(([team, stats]) => ({
-    team,
-    ...stats,
-  })).sort((a, b) => b.won - a.won);
+  console.log(scoreboard)
+  return Object.entries(scoreboard)
+    .map(([teamId, stats]) => ({
+      teamId,
+      ...stats,
+    }))
+    .sort((a, b) => b.won - a.won);
 };

@@ -13,7 +13,10 @@ export default function Settings() {
         <Switch value={darkMode} onValueChange={setDarkMode} />
       </View>
 
-      <TouchableOpacity className="bg-red-500 py-3 rounded-2xl">
+      <TouchableOpacity
+        className="bg-red-500 py-3 rounded-2xl"
+        activeOpacity={1}
+      >
         <Text className="text-center text-white font-semibold">
           Clear All Data
         </Text>
