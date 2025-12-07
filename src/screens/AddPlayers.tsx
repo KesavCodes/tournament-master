@@ -84,6 +84,9 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
     useState<LocalPlayer[]>(initialLocalPlayers);
   const [playerName, setPlayerName] = useState("");
   const [errorPlayerEmpty, setErrorPlayerEmpty] = useState(false);
+  const [screenType, setScreenType] = useState<
+    "curr_players_list" | "saved_players_list"
+  >("curr_players_list");
 
   // ensure local players update when tournamentTeams change externally
   useEffect(() => {
@@ -104,6 +107,20 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
     setLocalPlayers((s) => [...s, p]);
     setPlayerName("");
     setErrorPlayerEmpty(false);
+    setScreenType("curr_players_list");
+  };
+
+  const addLocalPlayerFromSavedPlayers = (id: string) => {
+    const playerInfo = playersById[id];
+    if (!playerInfo) return;
+    setLocalPlayers((s) => [
+      ...s,
+      {
+        id,
+        name: playerInfo.name,
+        teamId: undefined,
+      },
+    ]);
   };
 
   const updateLocalPlayer = (id: string, patch: Partial<LocalPlayer>) => {
@@ -219,8 +236,17 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
 
   return (
     <View className="flex-1 bg-gray-100 p-4">
-      <Text className="text-2xl font-bold mb-3">Add Players</Text>
-
+      <View className="flex-row justify-between items-center mb-4">
+        <Text className="text-2xl font-bold">Add Players</Text>
+        <TouchableOpacity
+          onPress={randomizeTeams}
+          activeOpacity={1}
+          className={`px-4 py-2 rounded-xl ${tournamentTeams.length === 0 || localPlayers.length === 0 ? "bg-gray-400" : "bg-gray-800"}`}
+          disabled={tournamentTeams.length === 0 || localPlayers.length === 0}
+        >
+          <Text className="text-white font-semibold">Randomize Teams</Text>
+        </TouchableOpacity>
+      </View>
       {/* add player input */}
       <View className="flex-row mb-4 items-center">
         <TextInput
@@ -247,12 +273,28 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
       {/* actions */}
       <View className="flex-row justify-between mb-4">
         <TouchableOpacity
-          onPress={randomizeTeams}
+          onPress={() =>
+            setScreenType((prev) =>
+              prev === "curr_players_list"
+                ? "saved_players_list"
+                : "curr_players_list"
+            )
+          }
           activeOpacity={1}
-          className={`px-4 py-2 rounded-xl ${tournamentTeams.length === 0 || localPlayers.length === 0 ? "bg-gray-400" : "bg-gray-800"}`}
-          disabled={tournamentTeams.length === 0 || localPlayers.length === 0}
+          className={`px-4 py-2 rounded-xl w-[49%] ${
+            Object.values(playersById).length === 0
+              ? "bg-gray-400"
+              : screenType === "curr_players_list"
+                ? "bg-gray-800"
+                : "bg-green-600"
+          }`}
+          disabled={Object.values(playersById).length === 0}
         >
-          <Text className="text-white font-semibold">Randomize Teams</Text>
+          <Text className="text-white font-semibold">
+            {screenType === "curr_players_list"
+              ? "Import from saved players"
+              : "View added players"}
+          </Text>
         </TouchableOpacity>
 
         {/* placeholder for import group — replace with a proper modal/selector as needed */}
@@ -279,61 +321,109 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
               ]
             );
           }}
-          className="px-4 py-2 rounded-xl bg-gray-500"
+          className="px-4 py-2 rounded-xl bg-gray-400 w-[49%]"
         >
           <Text className="text-white font-semibold">Import From Group</Text>
         </TouchableOpacity>
       </View>
 
-      {/* players list */}
-      <FlatList
-        data={localPlayers}
-        keyExtractor={(p) => p.id}
-        renderItem={({ item }) => (
-          <View className="bg-white rounded-2xl p-3 mb-3">
-            <View className="flex-row justify-between items-center mb-2">
-              <Text className="font-semibold text-gray-800">{item.name}</Text>
-              <TouchableOpacity
-                activeOpacity={1}
-                onPress={() => removeLocalPlayer(item.id)}
-              >
-                <Ionicons name="trash-bin" size={20} color="#ff3838ff" />
-              </TouchableOpacity>
-            </View>
+      {screenType === "curr_players_list" && (
+        <View className="flex-1">
+          <Text className="text-xl font-medium mb-4">Added Players</Text>
+          {/* players list */}
+          <FlatList
+            data={localPlayers}
+            keyExtractor={(p) => p.id}
+            className="h-[40%]"
+            renderItem={({ item }) => (
+              <View className="bg-white rounded-2xl p-3 mb-3">
+                <View className="flex-row justify-between items-center mb-2">
+                  <Text className="font-semibold text-gray-800">
+                    {item.name}
+                  </Text>
+                  <TouchableOpacity
+                    activeOpacity={1}
+                    onPress={() => removeLocalPlayer(item.id)}
+                  >
+                    <Ionicons name="trash-bin" size={20} color="#ff3838ff" />
+                  </TouchableOpacity>
+                </View>
 
-            <View className="border border-gray-300 rounded-xl p-2">
-              <Text className="text-sm text-gray-600 mb-1">Assign Team</Text>
-              <View>
-                <FlatList
-                  data={tournamentTeams}
-                  showsHorizontalScrollIndicator={false}
-                  keyExtractor={(tt) => tt.id}
-                  numColumns={2}
-                  renderItem={({ item: tt }) => (
-                    <TouchableOpacity
-                      activeOpacity={1}
-                      onPress={() =>
-                        updateLocalPlayer(item.id, { teamId: tt.id })
-                      }
-                      className={`px-3 py-2 rounded-xl mr-2 ${item.teamId === tt.id ? "bg-gray-800" : "bg-gray-200"}`}
-                    >
-                      <Text
-                        className={`${item.teamId === tt.id ? "text-white" : "text-black"}`}
-                      >
-                        {teamsById[tt.global_team_id]?.name ?? "Team"}
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                />
+                <View className="border border-gray-300 rounded-xl p-2">
+                  <Text className="text-sm text-gray-600 mb-1">
+                    Assign Team
+                  </Text>
+                  <View>
+                    <FlatList
+                      data={tournamentTeams}
+                      showsHorizontalScrollIndicator={false}
+                      keyExtractor={(tt) => tt.id}
+                      numColumns={2}
+                      renderItem={({ item: tt }) => (
+                        <TouchableOpacity
+                          activeOpacity={1}
+                          onPress={() =>
+                            updateLocalPlayer(item.id, { teamId: tt.id })
+                          }
+                          className={`px-3 py-2 rounded-xl mr-2 ${item.teamId === tt.id ? "bg-gray-800" : "bg-gray-200"}`}
+                        >
+                          <Text
+                            className={`${item.teamId === tt.id ? "text-white" : "text-black"}`}
+                          >
+                            {teamsById[tt.global_team_id]?.name ?? "Team"}
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                    />
+                  </View>
+                </View>
               </View>
-            </View>
-          </View>
-        )}
-        ListEmptyComponent={
-          <Text className="text-gray-400 text-center mt-6">No players yet</Text>
-        }
-      />
-
+            )}
+            ListEmptyComponent={
+              <Text className="text-gray-400 text-center mt-6">
+                No players yet
+              </Text>
+            }
+          />
+        </View>
+      )}
+      {/* Global Players selector */}
+      {screenType === "saved_players_list" && (
+        <View className="flex-1">
+          <Text className="text-xl font-medium mb-4">Saved Players</Text>
+          <FlatList
+            data={Object.values(playersById).filter((item) =>
+              localPlayers.every((player) => player.id !== item.id)
+            )}
+            keyExtractor={(p) => p.id}
+            className="h-[40%]"
+            renderItem={({ item }) => (
+              <View className="bg-white rounded-2xl p-3 mb-3">
+                <View className="flex-row justify-between items-center mb-2">
+                  <Text className="font-semibold text-gray-800">
+                    {item.name}
+                  </Text>
+                  <TouchableOpacity
+                    activeOpacity={1}
+                    onPress={() => addLocalPlayerFromSavedPlayers(item.id)}
+                  >
+                    <Ionicons
+                      name="add-circle-outline"
+                      size={20}
+                      color="green"
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+            ListEmptyComponent={
+              <Text className="text-gray-400 text-center mt-6">
+                No saved players available!
+              </Text>
+            }
+          />
+        </View>
+      )}
       <TouchableOpacity
         activeOpacity={1}
         className={`py-3 rounded-2xl mt-4 ${allAssigned ? "bg-gray-800" : "bg-gray-400"}`}

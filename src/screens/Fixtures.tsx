@@ -120,7 +120,6 @@ export default function Fixtures({ navigation, route }: Props) {
     return unsubscribe;
   }, [navigation]);
 
-  console.log(currTournamentFixtures, "check");
   return (
     <View className="flex-1 bg-white p-5">
       {/* ---------------- MODAL FOR SCORE ENTRY ---------------- */}

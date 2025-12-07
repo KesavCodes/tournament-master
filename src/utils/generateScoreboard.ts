@@ -33,7 +33,6 @@ export const generateScoreboard = (matches: FixturesWithTeamNames[]) => {
     }
   });
 
-  console.log(scoreboard)
   return Object.entries(scoreboard)
     .map(([teamId, stats]) => ({
       teamId,
