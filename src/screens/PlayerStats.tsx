@@ -1,0 +1,131 @@
+import {
+  FlatList,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import React, { useState } from "react";
+import { useAppSelector } from "../store/hooks";
+import { selectPlayerStats } from "../store/helpers/selector";
+
+const topPlayersEmojis = {
+  won: ["🥇 ", "🥈 ", "🥉 "],
+  winRate: ["🏆 ", "🥵 ", "😤 "],
+  lost: ["💔 ", "😭 ", "🤕 "],
+  played: [ "🎯 ", "🔥 ", "💪 "],
+};
+
+const PlayerStats = () => {
+  const [sortBy, setSortBy] = useState<"played" | "won" | "lost" | "winRate">(
+    "winRate"
+  );
+  const playerStats = useAppSelector((state) => selectPlayerStats(state)).sort(
+    (a, b) => b[sortBy] - a[sortBy]
+  );
+  return (
+    <View className="flex-1 bg-white p-5">
+      <View className="flex flex-row items-center bg-gray-800 px-4 rounded-t-2xl">
+        <TouchableOpacity
+          activeOpacity={1}
+          className="w-[30%] border-0 border-r border-r-white py-4"
+          // onPress={() => setSortBy("")}
+        >
+          <Text className="font-semibold text-white text-lg">Player Name</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          activeOpacity={1}
+          className="w-[20%] border-0 border-r border-r-white py-4"
+          onPress={() => setSortBy("played")}
+        >
+          <Text className="font-medium text-white text-md text-center">
+            Played
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          activeOpacity={1}
+          className="w-[15%] border-0 border-r border-r-white py-4"
+          onPress={() => setSortBy("won")}
+        >
+          <Text className="font-medium text-white text-md text-center">
+            Won
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          activeOpacity={1}
+          className="w-[15%] border-0 border-r border-r-white py-4"
+          onPress={() => setSortBy("lost")}
+        >
+          <Text className="font-medium text-white text-md text-center">
+            Lost
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          activeOpacity={1}
+          className="w-[20%] py-4"
+          onPress={() => setSortBy("winRate")}
+        >
+          <Text
+            className="font-medium text-white text-md text-center"
+            numberOfLines={1}
+          >
+            Win %
+          </Text>
+        </TouchableOpacity>
+      </View>
+      <FlatList
+        data={playerStats}
+        keyExtractor={(item) => item.playerId}
+        renderItem={({ item: stats, index }) => (
+          <View className="flex flex-row justify-between items-center bg-gray-200 px-4">
+            <Text
+              className="font-semibold text-md w-[30%] border-0 border-r py-4"
+              numberOfLines={1}
+            >
+              {topPlayersEmojis[sortBy][index] ?? "      "}
+              {stats.name}
+            </Text>
+
+            <Text className="font-medium text-md w-[20%] border-0 border-r py-4 text-center pr-3">
+              {stats.played}
+            </Text>
+
+            <Text className="font-medium text-md w-[15%] border-0 border-r py-4 text-center">
+              {stats.won}
+            </Text>
+            <Text className="font-medium text-md w-[15%] border-0 border-r py-4 text-center">
+              {stats.lost}
+            </Text>
+
+            <Text
+              className="font-medium text-md w-[20%] py-4 text-right"
+              numberOfLines={1}
+            >
+              {Number(stats.winRate).toFixed(2)}%
+            </Text>
+          </View>
+        )}
+        contentContainerStyle={{
+          borderRadius: 16,
+          overflow: "hidden",
+          borderTopLeftRadius: 0,
+          borderTopRightRadius: 0,
+        }}
+      />
+      <TouchableOpacity
+        activeOpacity={1}
+        className="bg-gray-800 rounded-2xl p-4 mt-6"
+        onPress={() => {}}
+      >
+        <Text className="text-white text-center font-semibold">
+          Go back to Fixtures
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+export default PlayerStats;
+
+const styles = StyleSheet.create({});

@@ -20,18 +20,29 @@ export default function Home({ navigation }: Props) {
   return (
     <View className="flex-1 bg-gray-100 px-3 pt-6">
       {/* Create Tournament Button */}
-      <TouchableOpacity
-        className="bg-gray-800 px-12 py-3 rounded-2xl mb-5 self-center w-3/4"
-        onPress={() => navigation.navigate("CreateTournament", { id: "" })}
-        activeOpacity={1}
-      >
-        <Text className="text-white text-2xl font-semibold text-center">
-          Create Tournament
-        </Text>
-      </TouchableOpacity>
+      <View className="flex-row justify-between">
+        <TouchableOpacity
+          className="bg-gray-800 border-2 py-3 rounded-2xl mb-5 self-center w-[49%]"
+          onPress={() => navigation.navigate("CreateTournament", { id: "" })}
+          activeOpacity={1}
+        >
+          <Text className="text-white text-xl font-semibold text-center">
+            Create Tournament
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          className="border-2 border-gray-800 py-3 rounded-2xl mb-5 self-center w-[49%]"
+          onPress={() => navigation.navigate("PlayerStats")}
+          activeOpacity={1}
+        >
+          <Text className="text-black text-xl font-semibold text-center">
+            Players Stats
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Container */}
-      <View className="flex-1 border-2 border-gray-700 bg-gray-200 rounded-2xl shadow-lg overflow-hidden">
+      <View className="border-2  border-gray-700 bg-gray-200 rounded-2xl shadow-lg overflow-hidden">
         {/* Header */}
         <View className="flex flex-row items-center justify-between w-full bg-gray-800 px-4 py-4">
           <Text className="text-white text-lg font-semibold">
@@ -53,7 +64,6 @@ export default function Home({ navigation }: Props) {
         <FlatList
           data={tournaments}
           keyExtractor={(item) => item.id}
-          className="w-full"
           contentContainerStyle={{ paddingBottom: 20 }}
           ListEmptyComponent={
             <Text className="text-center text-lg my-12">

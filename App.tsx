@@ -18,6 +18,8 @@ import ScoreboardScreen from "./src/screens/Scoreboard";
 import TeamInfoScreen from "./src/screens/TeamInfo";
 import HistoryScreen from "./src/screens/History";
 import SettingsScreen from "./src/screens/Settings";
+import PlayerStatsScreen from "./src/screens/PlayerStats";
+
 import { RootStackParamList } from "./src/types/navigation";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -81,6 +83,11 @@ export default function App() {
               name="Settings"
               component={SettingsScreen}
               options={{ title: "Settings" }}
+            />
+            <Stack.Screen
+              name="PlayerStats"
+              component={PlayerStatsScreen}
+              options={{ title: "Players Stats" }}
             />
           </Stack.Navigator>
         </NavigationContainer>

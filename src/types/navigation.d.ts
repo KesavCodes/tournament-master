@@ -11,4 +11,5 @@ export type RootStackParamList = {
   History: undefined;
   Settings: undefined;
   TeamInfo: { id: string };
+  PlayerStats: undefined;
 };

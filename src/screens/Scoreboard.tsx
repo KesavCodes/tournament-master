@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Button, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 // import { captureRef } from "react-native-view-shot";
 // import * as Sharing from "expo-sharing";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -41,20 +41,21 @@ export default function Results({ navigation, route }: Props) {
       []) as unknown as FixturesWithTeamNames[]
   );
 
-    return (
-      <View className="flex-1 bg-white p-5">
-        <Text className="text-2xl font-bold mb-4">Scoreboard</Text>
-        <View className="flex flex-row justify-between items-center bg-gray-800 px-4 rounded-t-2xl">
-          <Text className="font-semibold text-white text-lg w-1/2 border-0 border-r border-r-white py-4">
-            Team
-          </Text>
-          <Text className="font-medium text-white text-md w-1/4 pl-4 border-0 border-r border-r-white py-4">
-            Played
-          </Text>
-          <Text className="font-medium text-white text-md w-1/4 pl-4 py-4">
-            Won
-          </Text>
-        </View>
+  return (
+    <View className="flex-1 bg-white p-5">
+      <Text className="text-2xl font-bold mb-4">Scoreboard</Text>
+      <View className="flex flex-row items-center bg-gray-800 px-4 rounded-t-2xl">
+        <Text className="font-semibold text-white text-lg w-1/2 border-0 border-r border-r-white py-4">
+          Team
+        </Text>
+        <Text className="font-medium text-white text-md w-1/4 pl-4 border-0 border-r border-r-white py-4">
+          Played
+        </Text>
+        <Text className="font-medium text-white text-md w-1/4 pl-4 py-4">
+          Won
+        </Text>
+      </View>
+      <ScrollView>
         <View className="rounded-b-2xl overflow-hidden">
           {scoreboardData.map((team) => (
             <View
@@ -76,17 +77,18 @@ export default function Results({ navigation, route }: Props) {
             </View>
           ))}
         </View>
-        <TouchableOpacity
-          activeOpacity={1}
-          className="bg-gray-800 rounded-2xl p-4 mt-6"
-          onPress={() =>
-            navigation.navigate("Fixtures", { id: currTournamentId })
-          }
-        >
-          <Text className="text-white text-center font-semibold">
-            Go back to Fixtures
-          </Text>
-        </TouchableOpacity>
-      </View>
-    );
+      </ScrollView>
+      <TouchableOpacity
+        activeOpacity={1}
+        className="bg-gray-800 rounded-2xl p-4 mt-6"
+        onPress={() =>
+          navigation.navigate("Fixtures", { id: currTournamentId })
+        }
+      >
+        <Text className="text-white text-center font-semibold">
+          Go back to Fixtures
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
 }
