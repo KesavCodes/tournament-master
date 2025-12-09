@@ -219,6 +219,7 @@ export default function AddTeamsScreen({ navigation, route }: Props) {
 
         <TouchableOpacity
           className="bg-gray-500 px-3 py-2 rounded-2xl"
+          activeOpacity={1}
           onPress={() => {
             // refill with new random colors while keeping names
             setLocalTeams((prev) =>

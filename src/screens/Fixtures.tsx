@@ -37,13 +37,14 @@ export default function Fixtures({ navigation, route }: Props) {
     teamBScore?: string;
   } | null>(null);
 
-  const currTournamentFixtures = useAppSelector(
+  let currTournamentFixtures = useAppSelector(
     (state: RootState): Fixture[] =>
       selectFixturesByTournament(
         state,
         currTournamentId
       ) as unknown as Fixture[]
   );
+  currTournamentFixtures = currTournamentFixtures.filter((item: any)=>item.round <= 1000) 
   const teamsById = useAppSelector((state: RootState) => state.teams.byId);
   const dispatch = useAppDispatch();
 
@@ -263,8 +264,8 @@ export default function Fixtures({ navigation, route }: Props) {
               {hasResult &&
               item.teamAScore !== undefined &&
               item.teamBScore !== undefined ? (
-                <View className="bg-gray-800 rounded-xl px-3 py-2 self-start">
-                  <Text className="text-white font-semibold">
+                <View className="bg-gray-800 rounded-xl px-3 py-2 self-start w-full">
+                  <Text className="text-white font-semibold text-center">
                     {item.teamA} {item.teamAScore} - {item.teamBScore}{" "}
                     {item.teamB}
                   </Text>
@@ -278,19 +279,21 @@ export default function Fixtures({ navigation, route }: Props) {
       />
 
       {/* ---------------- PROCEED BUTTON ---------------- */}
-      <TouchableOpacity
-        className={`rounded-2xl p-3 mt-3 ${
-          !canNavigateToFinals ? "bg-gray-400" : "bg-gray-800"
-        }`}
-        disabled={!canNavigateToFinals}
-        onPress={() =>
-          navigation.navigate("TeamInfo", { id: currTournamentId })
-        }
-      >
-        <Text className="text-white text-center text-lg font-semibold">
-          Proceed to Knockouts
-        </Text>
-      </TouchableOpacity>
+      {currTournamentFixtures?.length > 1 && (
+        <TouchableOpacity
+          className={`rounded-2xl p-3 mt-3 ${
+            !canNavigateToFinals ? "bg-gray-400" : "bg-gray-800"
+          }`}
+          disabled={!canNavigateToFinals}
+          onPress={() =>
+            navigation.navigate("Knockout", { id: currTournamentId })
+          }
+        >
+          <Text className="text-white text-center text-lg font-semibold">
+            Proceed to Knockouts
+          </Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }

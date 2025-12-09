@@ -6,6 +6,7 @@ export const generateScoreboard = (matches: FixturesWithTeamNames[]) => {
       played: number;
       won: number;
       name: string;
+      points: number;
     };
   } = {};
 
@@ -16,6 +17,7 @@ export const generateScoreboard = (matches: FixturesWithTeamNames[]) => {
         played: 0,
         won: 0,
         name: teamA,
+        points: 0,
       };
     }
     if (!scoreboard[teamBId]) {
@@ -23,13 +25,24 @@ export const generateScoreboard = (matches: FixturesWithTeamNames[]) => {
         played: 0,
         won: 0,
         name: teamB,
+        points: 0,
       };
     }
     if (winnerId) {
       scoreboard[teamAId].played += 1;
       scoreboard[teamBId].played += 1;
-      if (winnerId === teamAId) scoreboard[teamAId].won += 1;
-      else if (winnerId === teamBId) scoreboard[teamBId].won += 1;
+      let scoreDiff = 0;
+      if (winnerId === teamAId) {
+        scoreboard[teamAId].won += 1;
+        scoreDiff = match.teamAScore! - match.teamBScore!;
+        scoreboard[teamAId].points += scoreDiff;
+        scoreboard[teamBId].points -= scoreDiff;
+      } else if (winnerId === teamBId) {
+        scoreboard[teamBId].won += 1;
+        scoreDiff = match.teamBScore! - match.teamAScore!;
+        scoreboard[teamBId].points += scoreDiff;
+        scoreboard[teamAId].points -= scoreDiff;
+      }
     }
   });
 
@@ -38,5 +51,8 @@ export const generateScoreboard = (matches: FixturesWithTeamNames[]) => {
       teamId,
       ...stats,
     }))
-    .sort((a, b) => b.won - a.won);
+    .sort((a, b) => {
+      if (b.won !== a.won) return b.won - a.won;
+      return b.points - a.points;
+    });
 };

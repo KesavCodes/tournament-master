@@ -45,14 +45,17 @@ export default function Results({ navigation, route }: Props) {
     <View className="flex-1 bg-white p-5">
       <Text className="text-2xl font-bold mb-4">Scoreboard</Text>
       <View className="flex flex-row items-center bg-gray-800 px-4 rounded-t-2xl">
-        <Text className="font-semibold text-white text-lg w-1/2 border-0 border-r border-r-white py-4">
+        <Text className="font-semibold text-white text-lg w-[40%] border-0 border-r border-r-white py-4">
           Team
         </Text>
-        <Text className="font-medium text-white text-md w-1/4 pl-4 border-0 border-r border-r-white py-4">
+        <Text className="font-medium text-white text-md w-[20%] border-0 border-r border-r-white py-4 text-center">
           Played
         </Text>
-        <Text className="font-medium text-white text-md w-1/4 pl-4 py-4">
+        <Text className="font-medium text-white text-md w-[20%] border-0 border-r border-r-white py-4 text-center">
           Won
+        </Text>
+        <Text className="font-medium text-white text-md w-[20%] py-4 text-center">
+          Points
         </Text>
       </View>
       <ScrollView>
@@ -60,19 +63,22 @@ export default function Results({ navigation, route }: Props) {
           {scoreboardData.map((team) => (
             <View
               key={team.teamId}
-              className="flex flex-row justify-between items-center bg-gray-200 px-4"
+              className="flex flex-row items-center bg-gray-200 px-4"
             >
               <Text
-                className="font-semibold text-md w-1/2 border-0 border-r py-4"
+                className="font-semibold text-md w-[40%] border-0 border-r py-4"
                 numberOfLines={1}
               >
                 {team.name}
               </Text>
-              <Text className="font-medium text-md w-1/4 pl-4 border-0 border-r py-4">
+              <Text className="font-medium text-md w-[20%] border-0 border-r py-4 text-center">
                 {team.played}
               </Text>
-              <Text className="font-medium text-md w-1/4 pl-4 py-4">
+              <Text className="font-medium text-md w-[20%] border-0 border-r py-4 text-center">
                 {team.won}
+              </Text>
+              <Text className="font-medium text-md w-[20%] py-4 text-right">
+                {team.points}
               </Text>
             </View>
           ))}

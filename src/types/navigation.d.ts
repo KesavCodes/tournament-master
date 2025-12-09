@@ -5,6 +5,9 @@ export type RootStackParamList = {
   Fixtures: {
     id: string;
   };
+   Knockout: {
+    id: string;
+  };
   AddPlayers: { id: string};
   Results: { name: string };
   Scoreboard: { id: string };

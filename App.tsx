@@ -19,6 +19,7 @@ import TeamInfoScreen from "./src/screens/TeamInfo";
 import HistoryScreen from "./src/screens/History";
 import SettingsScreen from "./src/screens/Settings";
 import PlayerStatsScreen from "./src/screens/PlayerStats";
+import KnockoutScreen from "./src/screens/Knockout";
 
 import { RootStackParamList } from "./src/types/navigation";
 
@@ -63,6 +64,11 @@ export default function App() {
               name="Fixtures"
               component={FixturesScreen}
               options={{ title: "Match Schedule" }}
+            />
+            <Stack.Screen
+              name="Knockout"
+              component={KnockoutScreen}
+              options={{ title: "Knockouts" }}
             />
             <Stack.Screen
               name="Scoreboard"
