@@ -1,7 +1,7 @@
 export type ID = string;
 
 export type TournamentType = "knockout" | "league";
-export type TournamentStatus = "not_started" | "ongoing" | "completed";
+export type TournamentStatus = "not_started" | "league" | "knockout" | "completed";
 
 export interface Tournament {
   id: ID;

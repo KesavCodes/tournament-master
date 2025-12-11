@@ -21,8 +21,9 @@ import {
 } from "../utils/attachTeamNames";
 import { generateScoreboard } from "../utils/generateScoreboard";
 import { updateTournament } from "../store/slice/tournamentsSlice";
-import { useSelector } from "react-redux";
 import { RootState } from "../store";
+import FixtureActions from "../components/FixtureActions";
+import FixtureRow from "../components/FixtureRow";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Knockout">;
 
@@ -30,9 +31,9 @@ export default function Knockout({ navigation, route }: Props) {
   const tournamentId = route.params.id;
   const dispatch = useAppDispatch();
 
-  const currTournament = useSelector((state: RootState) => state.tournaments.byId)[
-    tournamentId
-  ];
+  const currTournament = useAppSelector(
+    (state: RootState) => state.tournaments.byId
+  )[tournamentId];
   const fixtures = useAppSelector(
     (s) => selectFixturesByTournament(s, tournamentId) as unknown as Fixture[]
   );
@@ -137,7 +138,9 @@ export default function Knockout({ navigation, route }: Props) {
   }, [semiFinals, finalMatch]);
 
   // --- Modal open ---
-  const openModal = (match: Fixture) => {
+  const openModal = (matchId: string) => {
+    const match = fixtures.find((m) => m.id === matchId);
+    if (!match) return;
     setSelectedMatch({
       id: match.id,
       teamAId: match.teamAId,
@@ -174,11 +177,13 @@ export default function Knockout({ navigation, route }: Props) {
     const isFinal = finalMatch && finalMatch.id === selectedMatch.id;
     dispatch(bulkUpsertFixtures(updated));
     if (isFinal) {
-      updateTournament({
-        ...currTournament,
-        winnerTeamId: winner,
-        status: "completed",
-      });
+      dispatch(
+        updateTournament({
+          ...currTournament,
+          winnerTeamId: winner,
+          status: "completed",
+        })
+      );
       navigation.navigate("Home");
     }
     setModalVisible(false);
@@ -198,53 +203,43 @@ export default function Knockout({ navigation, route }: Props) {
       )[0]
     : null;
 
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("beforeRemove", (e) => {
+      e.preventDefault();
+      navigation.navigate("Home");
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
   return (
-    <View className="flex-1 p-5">
+    <View className="flex-1 p-5 bg-white">
+      <FixtureActions id={tournamentId} />
       {semiFinals.length > 0 && (
         <>
-          <Text className="text-lg font-semibold mb-2">Semi Finals</Text>
+          <Text className="text-2xl font-bold mb-4 text-center">
+            Semi Finals
+          </Text>
           <FlatList
             data={namedSF}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
-              <TouchableOpacity
-                className="bg-gray-200 p-3 rounded-xl mb-3"
-                onPress={() => openModal(item)}
-              >
-                <Text className="font-semibold">
-                  {item.teamA} vs {item.teamB}
-                </Text>
-                {item.teamAScore !== undefined && (
-                  <Text className="mt-1 text-gray-700">
-                    {item.teamAScore} - {item.teamBScore}
-                  </Text>
-                )}
-              </TouchableOpacity>
+              <FixtureRow item={item} handler={openModal} activeOpacity={1} />
             )}
           />
         </>
       )}
-
-      <Text className="text-lg font-semibold mt-6 mb-2">Final</Text>
-
       {namedFinal && (
-        <TouchableOpacity
-          className="bg-yellow-200 p-4 rounded-xl"
-          onPress={() => openModal(namedFinal)}
-        >
-          <Text className="font-semibold text-lg text-center">
-            🏆{" "}
-            {namedFinal.teamA === "TBA" || namedFinal.teamB === "TBA"
-              ? `TBA vs TBA`
-              : `${namedFinal.teamA}   |   ${namedFinal.teamB}`}{" "}
-            🏆
-          </Text>
-          {namedFinal.teamAScore !== undefined && (
-            <Text className="mt-1 font-semibold">
-              {namedFinal.teamAScore} - {namedFinal.teamBScore}
-            </Text>
-          )}
-        </TouchableOpacity>
+        <>
+          <Text className="text-2xl font-bold mb-4 text-center">Finals</Text>
+          <FlatList
+            data={[namedFinal]}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <FixtureRow item={item} handler={openModal} activeOpacity={1}/>
+            )}
+          />
+        </>
       )}
 
       <Modal visible={modalVisible} animationType="fade" transparent>

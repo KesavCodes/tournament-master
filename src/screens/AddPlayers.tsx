@@ -224,6 +224,7 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
     dispatch(
       updateTournament({
         ...tournament,
+        status: "league",
         isConfigCompleted: true,
       })
     );

@@ -76,7 +76,9 @@ export default function Home({ navigation }: Props) {
               activeOpacity={1}
               onPress={() =>
                 item.isConfigCompleted
-                  ? navigation.navigate("Fixtures", { id: item.id })
+                  ? item.status === "knockout"
+                    ? navigation.navigate("Knockout", { id: item.id })
+                    : navigation.navigate("Fixtures", { id: item.id })
                   : navigation.navigate("CreateTournament", { id: item.id })
               }
             >

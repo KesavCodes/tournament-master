@@ -20,6 +20,9 @@ import {
   FixturesWithTeamNames,
 } from "./../utils/attachTeamNames";
 import { bulkUpsertFixtures } from "../store/slice/fixturesSlice";
+import { updateTournament } from "../store/slice/tournamentsSlice";
+import FixtureActions from "../components/FixtureActions";
+import FixtureRow from "../components/FixtureRow";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Fixtures">;
 
@@ -44,7 +47,13 @@ export default function Fixtures({ navigation, route }: Props) {
         currTournamentId
       ) as unknown as Fixture[]
   );
-  currTournamentFixtures = currTournamentFixtures.filter((item: any)=>item.round <= 1000) 
+  const currTournament = useAppSelector(
+    (state: RootState) => state.tournaments.byId
+  )[currTournamentId];
+
+  currTournamentFixtures = currTournamentFixtures.filter(
+    (item: any) => item.round <= 1000
+  );
   const teamsById = useAppSelector((state: RootState) => state.teams.byId);
   const dispatch = useAppDispatch();
 
@@ -111,6 +120,16 @@ export default function Fixtures({ navigation, route }: Props) {
   const canNavigateToFinals = currTournamentFixtures.every(
     (match) => match.winnerId !== undefined
   );
+
+  const proceedToKnockout = () => {
+    dispatch(
+      updateTournament({
+        ...currTournament,
+        status: "knockout",
+      })
+    );
+    navigation.navigate("Knockout", { id: currTournamentId });
+  };
 
   React.useEffect(() => {
     const unsubscribe = navigation.addListener("beforeRemove", (e) => {
@@ -191,32 +210,7 @@ export default function Fixtures({ navigation, route }: Props) {
           </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
-
-      {/* ---------------- ACTION BUTTONS ---------------- */}
-      <View className="flex flex-row justify-between pb-4">
-        <TouchableOpacity
-          className="bg-gray-800 rounded-2xl p-3 mb-3 w-[48%]"
-          onPress={() =>
-            navigation.navigate("Scoreboard", { id: currTournamentId })
-          }
-        >
-          <Text className="text-white text-center text-lg font-semibold">
-            Scoreboard
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          className="bg-gray-800 rounded-2xl p-3 mb-3 w-[48%]"
-          onPress={() =>
-            navigation.navigate("TeamInfo", { id: currTournamentId })
-          }
-        >
-          <Text className="text-white text-center text-lg font-semibold">
-            Team Info
-          </Text>
-        </TouchableOpacity>
-      </View>
-
+      <FixtureActions id={currTournamentId} />
       <Text className="text-2xl font-bold mb-4 text-center">Fixtures</Text>
 
       {/* ---------------- FIXTURE LIST ---------------- */}
@@ -226,56 +220,7 @@ export default function Fixtures({ navigation, route }: Props) {
             []) as unknown as FixturesWithTeamNames[]
         }
         keyExtractor={(m) => m.id}
-        renderItem={({ item }) => {
-          const hasResult = item.winnerId !== undefined;
-          const teamAWin = hasResult && item.winnerId === item.teamAId;
-          const teamBWin = hasResult && item.winnerId === item.teamBId;
-
-          return (
-            <TouchableOpacity
-              className="border bg-gray-100 border-gray-200 rounded-2xl p-3 mb-3"
-              onPress={() => matchResultHandler(item.id)}
-              activeOpacity={0.7}
-            >
-              {/* TEAM ROW */}
-              <View className="flex flex-row justify-between mb-2">
-                {/* TEAM A */}
-                <Text
-                  className={`w-[49%] border-0 border-r-2 pr-2 text-base ${
-                    teamAWin ? "font-bold text-green-600" : "text-gray-700"
-                  }`}
-                  numberOfLines={1}
-                >
-                  {item.teamA} {teamAWin ? "🏆" : ""}
-                </Text>
-
-                {/* TEAM B */}
-                <Text
-                  className={`w-[49%] text-right text-base ${
-                    teamBWin ? "font-bold text-green-600" : "text-gray-700"
-                  }`}
-                  numberOfLines={1}
-                >
-                  {item.teamB} {teamBWin ? "🏆" : ""}
-                </Text>
-              </View>
-
-              {/* INLINE SCORE BADGE */}
-              {hasResult &&
-              item.teamAScore !== undefined &&
-              item.teamBScore !== undefined ? (
-                <View className="bg-gray-800 rounded-xl px-3 py-2 self-start w-full">
-                  <Text className="text-white font-semibold text-center">
-                    {item.teamA} {item.teamAScore} - {item.teamBScore}{" "}
-                    {item.teamB}
-                  </Text>
-                </View>
-              ) : (
-                <Text className="text-gray-500">Tap to record result</Text>
-              )}
-            </TouchableOpacity>
-          );
-        }}
+        renderItem={({item})=> <FixtureRow item={item} handler={matchResultHandler} activeOpacity={0.7} />}
       />
 
       {/* ---------------- PROCEED BUTTON ---------------- */}
@@ -285,9 +230,7 @@ export default function Fixtures({ navigation, route }: Props) {
             !canNavigateToFinals ? "bg-gray-400" : "bg-gray-800"
           }`}
           disabled={!canNavigateToFinals}
-          onPress={() =>
-            navigation.navigate("Knockout", { id: currTournamentId })
-          }
+          onPress={proceedToKnockout}
         >
           <Text className="text-white text-center text-lg font-semibold">
             Proceed to Knockouts
