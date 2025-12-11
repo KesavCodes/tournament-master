@@ -108,8 +108,8 @@ export default function Knockout({ navigation, route }: Props) {
     const finalEmpty: Fixture = {
       id: `KO-F-${Date.now()}`,
       tournament_id: tournamentId,
-      teamAId: "TBA", // placeholder
-      teamBId: "TBA",
+      teamAId: "TBA-1", // placeholder
+      teamBId: "TBA-2",
       round: 1002,
       matchNumber: ++currentFixturesMatchCount,
       created_at: new Date().toISOString(),
@@ -118,24 +118,33 @@ export default function Knockout({ navigation, route }: Props) {
     dispatch(bulkUpsertFixtures([sf1, sf2, finalEmpty]));
   }, []);
 
-  // --- When semifinals winners available, populate final ---
-  useEffect(() => {
-    if (teamCount <= 4) return; // final only case
+useEffect(() => {
+  if (teamCount <= 4) return; // final-only tournaments skip
+  if (semiFinals.length < 2 || !finalMatch) return;
 
-    // ensure we have 2 SF
-    if (semiFinals.length < 2 || !finalMatch) return;
+  const winners = semiFinals.map(m => m.winnerId).filter(Boolean);
 
-    const winners = semiFinals.map((m) => m.winnerId).filter(Boolean);
+  // final already updated → skip
+  if (
+    finalMatch.teamAId !== "TBA-1" &&
+    finalMatch.teamBId !== "TBA-2"
+  ) {
+    return;
+  }
 
-    if (winners.length === 2) {
-      const updatedFinal: Fixture = {
-        ...finalMatch,
-        teamAId: winners[0]!,
-        teamBId: winners[1]!,
-      };
-      dispatch(bulkUpsertFixtures([updatedFinal]));
-    }
-  }, [semiFinals, finalMatch]);
+  if (winners.length === 2) {
+    dispatch(
+      bulkUpsertFixtures([
+        {
+          ...finalMatch,
+          teamAId: winners[0]!,
+          teamBId: winners[1]!,
+        },
+      ])
+    );
+  }
+}, [semiFinals, finalMatch?.id, finalMatch?.teamAId, finalMatch?.teamBId]);
+
 
   // --- Modal open ---
   const openModal = (matchId: string) => {
@@ -175,18 +184,33 @@ export default function Knockout({ navigation, route }: Props) {
         : m
     );
     const isFinal = finalMatch && finalMatch.id === selectedMatch.id;
-    dispatch(bulkUpsertFixtures(updated));
+    const proceedSave = () => {
+      dispatch(bulkUpsertFixtures(updated));
+      if (isFinal) {
+        dispatch(
+          updateTournament({
+            ...currTournament,
+            winnerTeamId: winner,
+            status: "completed",
+          })
+        );
+      }
+      setModalVisible(false);
+    };
     if (isFinal) {
-      dispatch(
-        updateTournament({
-          ...currTournament,
-          winnerTeamId: winner,
-          status: "completed",
-        })
+      Alert.alert(
+        "Finals Result",
+        "Make sure the entries are correct. This cannot be changed.",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Save",
+            style: "default",
+            onPress: () => proceedSave(),
+          },
+        ]
       );
-      navigation.navigate("Home");
-    }
-    setModalVisible(false);
+    } else proceedSave();
   };
 
   // attach names for UI
@@ -213,10 +237,18 @@ export default function Knockout({ navigation, route }: Props) {
   }, [navigation]);
 
   return (
-    <View className="flex-1 p-5 bg-white">
+    <View className="py-4 px-3 bg-white">
       <FixtureActions id={tournamentId} />
+      {!!namedFinal?.winnerId && (
+        <View className="mb-6">
+          <Text className="text-2xl font-bold mb-4 text-center text-green-600">
+            🏆 {teamsById[namedFinal?.winnerId].name} 🏆
+          </Text>
+          <Text className="text-xl font-bold mb-4 text-center text-gray-800">✨ Won the Tournament ✨</Text>
+        </View>
+      )}
       {semiFinals.length > 0 && (
-        <>
+        <View className="mb-6">
           <Text className="text-2xl font-bold mb-4 text-center">
             Semi Finals
           </Text>
@@ -224,19 +256,29 @@ export default function Knockout({ navigation, route }: Props) {
             data={namedSF}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
-              <FixtureRow item={item} handler={openModal} activeOpacity={1} />
+              <FixtureRow
+                item={item}
+                handler={openModal}
+                activeOpacity={1}
+                disabled={!!namedFinal?.winnerId}
+              />
             )}
           />
-        </>
+        </View>
       )}
-      {namedFinal && (
+      {namedFinal && Object.keys(namedFinal).length > 0 && (
         <>
           <Text className="text-2xl font-bold mb-4 text-center">Finals</Text>
           <FlatList
             data={[namedFinal]}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
-              <FixtureRow item={item} handler={openModal} activeOpacity={1}/>
+              <FixtureRow
+                item={item}
+                handler={openModal}
+                activeOpacity={1}
+                disabled={!!namedFinal.winnerId}
+              />
             )}
           />
         </>

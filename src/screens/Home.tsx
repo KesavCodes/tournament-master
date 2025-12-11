@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, FlatList } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../types/navigation";
 import { useAppSelector } from "../store/hooks";
+import TournamentHistory from "../components/TournamentHistory";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Home">;
 
@@ -15,7 +16,8 @@ export default function Home({ navigation }: Props) {
     .sort(
       (a, b) =>
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    );
+    )
+    .slice(0, 6);
 
   return (
     <View className="flex-1 bg-gray-100 px-3 pt-6">
@@ -70,33 +72,7 @@ export default function Home({ navigation }: Props) {
               No Tournaments found
             </Text>
           }
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              className="bg-gray-800 rounded-2xl mx-4 my-2 px-4 py-6"
-              activeOpacity={1}
-              onPress={() =>
-                item.isConfigCompleted
-                  ? item.status === "knockout"
-                    ? navigation.navigate("Knockout", { id: item.id })
-                    : navigation.navigate("Fixtures", { id: item.id })
-                  : navigation.navigate("CreateTournament", { id: item.id })
-              }
-            >
-              <View className="flex flex-row justify-between items-center mb-4">
-                <Text className="font-semibold text-white text-lg">
-                  {item.name}
-                </Text>
-
-                <Text className="bg-gray-200 text-black text-md font-medium rounded-2xl px-4 py-1">
-                  {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
-                </Text>
-              </View>
-
-              <Text className="text-white opacity-80">
-                Tap to open tournament
-              </Text>
-            </TouchableOpacity>
-          )}
+          renderItem={({ item }) => <TournamentHistory item={item} />}
         />
       </View>
     </View>

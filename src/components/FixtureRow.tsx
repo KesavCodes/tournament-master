@@ -1,16 +1,17 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
-import { Fixture } from "../types";
 import { FixturesWithTeamNames } from "../utils/attachTeamNames";
 
 const FixtureRow = ({
   item,
   handler,
   activeOpacity = 0.7,
+  disabled = false,
 }: {
   item: FixturesWithTeamNames;
   handler: (matchId: string) => void;
   activeOpacity: number;
+  disabled: boolean;
 }) => {
   const hasResult = item.winnerId !== undefined;
   const teamAWin = hasResult && item.winnerId === item.teamAId;
@@ -21,6 +22,7 @@ const FixtureRow = ({
       className="border bg-gray-100 border-gray-200 rounded-2xl p-3 mb-3"
       onPress={() => handler(item.id)}
       activeOpacity={activeOpacity}
+      disabled={disabled}
     >
       {/* TEAM ROW */}
       <View className="flex flex-row justify-between mb-2">
@@ -31,7 +33,7 @@ const FixtureRow = ({
           }`}
           numberOfLines={1}
         >
-          {item.teamA} {teamAWin ? "🏆" : ""}
+          {teamAWin ? "🏆" : ""} {item.teamA}
         </Text>
 
         {/* TEAM B */}
@@ -41,10 +43,9 @@ const FixtureRow = ({
           }`}
           numberOfLines={1}
         >
-          {item.teamB} {teamBWin ? "🏆" : ""}
+          {teamBWin ? "🏆" : ""} {item.teamB} 
         </Text>
       </View>
-
       {/* INLINE SCORE BADGE */}
       {hasResult &&
       item.teamAScore !== undefined &&

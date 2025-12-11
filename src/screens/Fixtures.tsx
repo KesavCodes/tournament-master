@@ -141,7 +141,7 @@ export default function Fixtures({ navigation, route }: Props) {
   }, [navigation]);
 
   return (
-    <View className="flex-1 bg-white p-5">
+    <View className="flex-1 bg-white py-4 px-3">
       {/* ---------------- MODAL FOR SCORE ENTRY ---------------- */}
       <Modal
         visible={showModal}
@@ -220,13 +220,13 @@ export default function Fixtures({ navigation, route }: Props) {
             []) as unknown as FixturesWithTeamNames[]
         }
         keyExtractor={(m) => m.id}
-        renderItem={({item})=> <FixtureRow item={item} handler={matchResultHandler} activeOpacity={0.7} />}
+        renderItem={({item})=> <FixtureRow item={item} handler={matchResultHandler} activeOpacity={0.7} disabled={false} />}
       />
 
       {/* ---------------- PROCEED BUTTON ---------------- */}
       {currTournamentFixtures?.length > 1 && (
         <TouchableOpacity
-          className={`rounded-2xl p-3 mt-3 ${
+          className={`rounded-2xl p-3 mt-4 mb-10 ${
             !canNavigateToFinals ? "bg-gray-400" : "bg-gray-800"
           }`}
           disabled={!canNavigateToFinals}

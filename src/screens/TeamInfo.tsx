@@ -28,7 +28,7 @@ const TeamInfo = ({ navigation, route }: Props) => {
   }, [currTournamentTeamsAndPlayers.length, navigation]);
   
   return (
-    <View className="p-5">
+    <View className="py-4 px-3">
       <FlatList
         data={
           (currTournamentTeamsAndPlayers ||

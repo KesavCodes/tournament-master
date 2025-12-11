@@ -201,7 +201,7 @@ export default function AddTeamsScreen({ navigation, route }: Props) {
   // So reconciliation (increase/decrease) is already handled in effect above.
 
   return (
-    <View className="flex-1 bg-gray-100 p-4">
+    <View className="flex-1 bg-gray-100 py-4 px-3">
       <Text className="text-2xl font-bold mb-4">
         Setup Teams ({expectedCount})
       </Text>
@@ -218,7 +218,7 @@ export default function AddTeamsScreen({ navigation, route }: Props) {
         </TouchableOpacity>
 
         <TouchableOpacity
-          className="bg-gray-500 px-3 py-2 rounded-2xl"
+          className="border border-1 border-gray-800 px-3 py-2 rounded-2xl"
           activeOpacity={1}
           onPress={() => {
             // refill with new random colors while keeping names
@@ -230,7 +230,7 @@ export default function AddTeamsScreen({ navigation, route }: Props) {
             );
           }}
         >
-          <Text className="text-white font-semibold">Randomize Colors</Text>
+          <Text className="text-gray-800 font-semibold">Randomize Colors</Text>
         </TouchableOpacity>
       </View>
 
@@ -238,7 +238,7 @@ export default function AddTeamsScreen({ navigation, route }: Props) {
         data={localTeams}
         keyExtractor={(item) => item.id}
         renderItem={({ item, index }) => (
-          <View className="bg-white rounded-2xl p-3 mb-3 flex-row items-center justify-between">
+          <View className="bg-white rounded-2xl p-3 mb-3 flex-row items-start justify-between">
             <View className="flex-1 pr-3">
               <TextInput
                 value={item.name}
@@ -253,7 +253,7 @@ export default function AddTeamsScreen({ navigation, route }: Props) {
             <View className="items-end">
               <TouchableOpacity
                 onPress={() => openColorModal(index)}
-                className="w-14 h-14 rounded-xl items-center justify-center"
+                className="w-14 h-14 rounded-xl items-center justify-center border border-1"
                 style={{ backgroundColor: item.color ?? "#ddd" }}
               />
             </View>
@@ -263,7 +263,7 @@ export default function AddTeamsScreen({ navigation, route }: Props) {
       />
 
       <TouchableOpacity
-        className="bg-gray-800 py-3 rounded-2xl mt-4"
+        className="bg-gray-800 py-3 rounded-2xl mt-4 mb-10"
         onPress={saveTeams}
       >
         <Text className="text-white text-center font-semibold">Save Teams</Text>

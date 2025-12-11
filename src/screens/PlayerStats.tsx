@@ -25,8 +25,9 @@ const PlayerStats = () => {
   const playerStats = useAppSelector((state) => selectPlayerStats(state)).sort(
     (a, b) => b[sortBy] - a[sortBy]
   );
+  if(playerStats.length === 0) return <Text className="font-semibold text-lg mt-16 text-center">No player added yet!</Text>
   return (
-    <View className="flex-1 bg-white p-5">
+    <View className="flex-1 bg-white py-4 px-3">
       <View className="flex-row gap-2">
         <Ionicons name="information-circle" size={18} />
         <Text className="mb-4 w-[90%]">
@@ -40,14 +41,14 @@ const PlayerStats = () => {
           className="w-[30%] border-0 border-r border-r-white py-4"
           // onPress={() => setSortBy("")}
         >
-          <Text className="font-semibold text-white text-lg">Player Name</Text>
+          <Text className="font-semibold text-white text-lg" numberOfLines={1}>Player</Text>
         </TouchableOpacity>
         <TouchableOpacity
           activeOpacity={1}
           className="w-[20%] border-0 border-r border-r-white py-4"
           onPress={() => setSortBy("played")}
         >
-          <Text className="font-medium text-white text-md text-center">
+          <Text className="font-medium text-white text-md text-center" numberOfLines={1}>
             {sortBy === "played" && "↕️ "}
             Played
           </Text>
@@ -57,7 +58,7 @@ const PlayerStats = () => {
           className="w-[15%] border-0 border-r border-r-white py-4"
           onPress={() => setSortBy("won")}
         >
-          <Text className="font-medium text-white text-md text-center">
+          <Text className="font-medium text-white text-md text-center" numberOfLines={1}>
             {sortBy === "won" && "↕️ "}
             Won
           </Text>
@@ -67,7 +68,7 @@ const PlayerStats = () => {
           className="w-[15%] border-0 border-r border-r-white py-4"
           onPress={() => setSortBy("lost")}
         >
-          <Text className="font-medium text-white text-md text-center">
+          <Text className="font-medium text-white text-md text-center" numberOfLines={1}>
             {sortBy === "lost" && "↕️ "}
             Lost
           </Text>
@@ -125,15 +126,6 @@ const PlayerStats = () => {
           borderTopRightRadius: 0,
         }}
       />
-      <TouchableOpacity
-        activeOpacity={1}
-        className="bg-gray-800 rounded-2xl p-4 mt-6"
-        onPress={() => {}}
-      >
-        <Text className="text-white text-center font-semibold">
-          Go back to Fixtures
-        </Text>
-      </TouchableOpacity>
     </View>
   );
 };

@@ -7,6 +7,7 @@ import {
   addTournament,
   updateTournament,
 } from "../store/slice/tournamentsSlice";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 type Props = NativeStackScreenProps<RootStackParamList, "CreateTournament">;
 
@@ -63,9 +64,8 @@ export default function CreateTournament({ navigation, route }: Props) {
   /** input sanitization for team count */
   const numInputHandler = (value: string) => {
     const cleaned = value.replace(/[^0-9]/g, "");
-
     if (!cleaned) {
-      setNoOfTeams("2");
+      setNoOfTeams("");
       return;
     }
 
@@ -91,7 +91,7 @@ export default function CreateTournament({ navigation, route }: Props) {
   }, [navigation, currTournamentId]);
 
   return (
-    <View className="flex-1 bg-white p-5">
+    <View className="flex-1 bg-white py-5 px-3">
       <Text className="mb-2 font-semibold text-gray-600">Tournament Name</Text>
       <TextInput
         className="border border-gray-300 p-3 rounded-2xl mb-5"
@@ -110,7 +110,9 @@ export default function CreateTournament({ navigation, route }: Props) {
       />
 
       <Text className="text-gray-500 text-sm mb-6">
-        Minimum 2 teams required
+        {" "}
+        <Ionicons name="information-circle" size={14} /> Minimum 2 teams
+        required
       </Text>
 
       <TouchableOpacity

@@ -291,7 +291,7 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
           }`}
           disabled={Object.values(playersById).length === 0}
         >
-          <Text className="text-white font-semibold">
+          <Text className="text-white font-semibold text-center">
             {screenType === "curr_players_list"
               ? "Import from saved players"
               : "View added players"}
@@ -324,7 +324,7 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
           }}
           className="px-4 py-2 rounded-xl bg-gray-400 w-[49%]"
         >
-          <Text className="text-white font-semibold">Import From Group</Text>
+          <Text className="text-white font-semibold text-center">Import From Group</Text>
         </TouchableOpacity>
       </View>
 
@@ -351,7 +351,7 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
                 </View>
 
                 <View className="border border-gray-300 rounded-xl p-2">
-                  <Text className="text-sm text-gray-600 mb-1">
+                  <Text className="text-sm text-gray-600 mb-2">
                     Assign Team
                   </Text>
                   <View>
@@ -366,7 +366,7 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
                           onPress={() =>
                             updateLocalPlayer(item.id, { teamId: tt.id })
                           }
-                          className={`px-3 py-2 rounded-xl mr-2 ${item.teamId === tt.id ? "bg-gray-800" : "bg-gray-200"}`}
+                          className={`px-3 py-2 rounded-xl mb-2 mr-2 ${item.teamId === tt.id ? "bg-gray-800" : "bg-gray-200"}`}
                         >
                           <Text
                             className={`${item.teamId === tt.id ? "text-white" : "text-black"}`}
@@ -427,7 +427,7 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
       )}
       <TouchableOpacity
         activeOpacity={1}
-        className={`py-3 rounded-2xl mt-4 ${allAssigned ? "bg-gray-800" : "bg-gray-400"}`}
+        className={`py-3 rounded-2xl mt-4 mb-10 ${allAssigned ? "bg-gray-800" : "bg-gray-400"}`}
         disabled={!allAssigned}
         onPress={proceed}
       >

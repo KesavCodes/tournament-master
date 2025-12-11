@@ -37,13 +37,14 @@ export default function Results({ navigation, route }: Props) {
     );
 
   const scoreboardData = generateScoreboard(
-    (attachTeamNames(currTournamentFixtures, teamsById) ??
-      []) as unknown as FixturesWithTeamNames[]
+    (attachTeamNames(
+      currTournamentFixtures.filter((item) => item.round && item.round < 1000),
+      teamsById
+    ) ?? []) as unknown as FixturesWithTeamNames[]
   );
 
   return (
-    <View className="flex-1 bg-white p-5">
-      <Text className="text-2xl font-bold mb-4">Scoreboard</Text>
+    <View className="flex-1 bg-white py-4 px-3">
       <View className="flex flex-row items-center bg-gray-800 px-4 rounded-t-2xl">
         <Text className="font-semibold text-white text-lg w-[40%] border-0 border-r border-r-white py-4">
           Team
@@ -86,7 +87,7 @@ export default function Results({ navigation, route }: Props) {
       </ScrollView>
       <TouchableOpacity
         activeOpacity={1}
-        className="bg-gray-800 rounded-2xl p-4 mt-6"
+        className="bg-gray-800 rounded-2xl p-4 mt-4 mb-10"
         onPress={() =>
           navigation.navigate("Fixtures", { id: currTournamentId })
         }
