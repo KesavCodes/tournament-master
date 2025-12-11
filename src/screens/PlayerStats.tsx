@@ -9,12 +9,13 @@ import {
 import React, { useState } from "react";
 import { useAppSelector } from "../store/hooks";
 import { selectPlayerStats } from "../store/helpers/selector";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 const topPlayersEmojis = {
   won: ["🥇 ", "🥈 ", "🥉 "],
   winRate: ["🏆 ", "🥵 ", "😤 "],
   lost: ["💔 ", "😭 ", "🤕 "],
-  played: [ "🎯 ", "🔥 ", "💪 "],
+  played: ["🎯 ", "🔥 ", "💪 "],
 };
 
 const PlayerStats = () => {
@@ -26,6 +27,13 @@ const PlayerStats = () => {
   );
   return (
     <View className="flex-1 bg-white p-5">
+      <View className="flex-row gap-2">
+        <Ionicons name="information-circle" size={18} />
+        <Text className="mb-4 w-[90%]">
+          You can change the sort order by clicking on the column header. You
+          can sort based on the matches played, won, lost and by win percentage.
+        </Text>
+      </View>
       <View className="flex flex-row items-center bg-gray-800 px-4 rounded-t-2xl">
         <TouchableOpacity
           activeOpacity={1}
@@ -40,6 +48,7 @@ const PlayerStats = () => {
           onPress={() => setSortBy("played")}
         >
           <Text className="font-medium text-white text-md text-center">
+            {sortBy === "played" && "↕️ "}
             Played
           </Text>
         </TouchableOpacity>
@@ -49,6 +58,7 @@ const PlayerStats = () => {
           onPress={() => setSortBy("won")}
         >
           <Text className="font-medium text-white text-md text-center">
+            {sortBy === "won" && "↕️ "}
             Won
           </Text>
         </TouchableOpacity>
@@ -58,6 +68,7 @@ const PlayerStats = () => {
           onPress={() => setSortBy("lost")}
         >
           <Text className="font-medium text-white text-md text-center">
+            {sortBy === "lost" && "↕️ "}
             Lost
           </Text>
         </TouchableOpacity>
@@ -70,6 +81,7 @@ const PlayerStats = () => {
             className="font-medium text-white text-md text-center"
             numberOfLines={1}
           >
+            {sortBy === "winRate" && "↕️ "}
             Win %
           </Text>
         </TouchableOpacity>
