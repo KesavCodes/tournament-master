@@ -157,23 +157,23 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
 
   // import from player group (example: get first group and populate)
   // Replace with your real player group selection UI
-  const importFromGroup = (groupId: string) => {
-    // selector for group members not provided here; assume you have playerGroupMembers slice
-    const groupMembers = useAppSelector((s) =>
-      Object.values(s.playerGroupMembers.byId).filter(
-        (m) => m.group_id === groupId
-      )
-    );
-    const playersToImport = groupMembers.map((m) => {
-      const p = playersById[m.player_id];
-      return {
-        id: Date.now().toString() + "-" + m.player_id,
-        name: p?.name ?? "Unknown",
-        teamId: undefined,
-      } as LocalPlayer;
-    });
-    setLocalPlayers((prev) => [...prev, ...playersToImport]);
-  };
+  // const importFromGroup = (groupId: string) => {
+  //   // selector for group members not provided here; assume you have playerGroupMembers slice
+  //   const groupMembers = useAppSelector((s) =>
+  //     Object.values(s.playerGroupMembers.byId).filter(
+  //       (m) => m.group_id === groupId
+  //     )
+  //   );
+  //   const playersToImport = groupMembers.map((m) => {
+  //     const p = playersById[m.player_id];
+  //     return {
+  //       id: Date.now().toString() + "-" + m.player_id,
+  //       name: p?.name ?? "Unknown",
+  //       teamId: undefined,
+  //     } as LocalPlayer;
+  //   });
+  //   setLocalPlayers((prev) => [...prev, ...playersToImport]);
+  // };
 
   // proceed: persist players (global) and update tournamentTeam.players arrays
   const proceed = () => {
@@ -274,32 +274,26 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
       {/* actions */}
       <View className="flex-row justify-between mb-4">
         <TouchableOpacity
-          onPress={() =>
-            setScreenType((prev) =>
-              prev === "curr_players_list"
-                ? "saved_players_list"
-                : "curr_players_list"
-            )
-          }
+          onPress={() => setScreenType("curr_players_list")}
           activeOpacity={1}
-          className={`px-4 py-2 rounded-xl w-[49%] ${
-            Object.values(playersById).length === 0
-              ? "bg-gray-400"
-              : screenType === "curr_players_list"
-                ? "bg-gray-800"
-                : "bg-green-600"
-          }`}
-          disabled={Object.values(playersById).length === 0}
+          className="px-4 py-2 rounded-xl border-2 border-gray-800 w-[49%] bg-gray-800"
         >
           <Text className="text-white font-semibold text-center">
-            {screenType === "curr_players_list"
-              ? "Import from saved players"
-              : "View added players"}
+            Added players
           </Text>
         </TouchableOpacity>
-
-        {/* placeholder for import group — replace with a proper modal/selector as needed */}
         <TouchableOpacity
+          onPress={() => setScreenType("saved_players_list")}
+          activeOpacity={1}
+          className="px-4 py-2 rounded-xl w-[49%] border-2 border-gray-800"
+          disabled={Object.values(playersById).length === 0}
+        >
+          <Text className="text-gray-800 font-semibold text-center">
+            Saved players
+          </Text>
+        </TouchableOpacity>
+        {/* placeholder for import group — replace with a proper modal/selector as needed */}
+        {/* <TouchableOpacity
           activeOpacity={1}
           onPress={() => {
             // open group picker — here we call importFromGroup with an example group id
@@ -325,12 +319,12 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
           className="px-4 py-2 rounded-xl bg-gray-400 w-[49%]"
         >
           <Text className="text-white font-semibold text-center">Import From Group</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {screenType === "curr_players_list" && (
         <View className="flex-1">
-          <Text className="text-xl font-medium mb-4">Added Players</Text>
+          <Text className="text-xl font-medium mb-4">Currently Added Players</Text>
           {/* players list */}
           <FlatList
             data={localPlayers}
@@ -391,7 +385,7 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
       {/* Global Players selector */}
       {screenType === "saved_players_list" && (
         <View className="flex-1">
-          <Text className="text-xl font-medium mb-4">Saved Players</Text>
+          <Text className="text-xl font-medium mb-4">Import from Saved Players</Text>
           <FlatList
             data={Object.values(playersById).filter((item) =>
               localPlayers.every((player) => player.id !== item.id)
