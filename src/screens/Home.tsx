@@ -44,7 +44,7 @@ export default function Home({ navigation }: Props) {
       </View>
 
       {/* Container */}
-      <View className="border-2  border-gray-700 bg-gray-200 rounded-2xl shadow-lg overflow-hidden">
+      <View className="border-2  border-gray-700 bg-gray-200 rounded-2xl shadow-lg overflow-hidden max-h-[85%]">
         {/* Header */}
         <View className="flex flex-row items-center justify-between w-full bg-gray-800 px-4 py-4">
           <Text className="text-white text-lg font-semibold">
@@ -66,7 +66,7 @@ export default function Home({ navigation }: Props) {
         <FlatList
           data={tournaments}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingBottom: 20 }}
+          contentContainerStyle={{ paddingBottom: 20, paddingTop: 2 }}
           ListEmptyComponent={
             <Text className="text-center text-lg my-12">
               No Tournaments found

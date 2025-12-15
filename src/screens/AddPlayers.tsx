@@ -149,11 +149,10 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
       ...p,
       teamId: tournamentTeams[i % tournamentTeams.length].id,
     }));
-    // keep original order by id insertion time (optional)
     setLocalPlayers(assigned);
   };
 
-  const playerGroups = useAppSelector((s) => s.playerGroups.byId);
+  // const playerGroups = useAppSelector((s) => s.playerGroups.byId);
 
   // import from player group (example: get first group and populate)
   // Replace with your real player group selection UI
@@ -224,16 +223,20 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
     dispatch(
       updateTournament({
         ...tournament,
-        status: "league",
+        status: fixturesRaw.length === 1 ? "knockout" : "league",
         isConfigCompleted: true,
       })
     );
 
-    navigation.navigate("Fixtures", { id: tournamentId });
+    navigation.navigate(fixturesRaw.length === 1 ? "Knockout" : "Fixtures", {
+      id: tournamentId,
+    });
   };
 
   const allAssigned =
-    localPlayers.length > 0 && localPlayers.every((p) => !!p.teamId);
+    localPlayers.length > 0 &&
+    localPlayers.every((p) => !!p.teamId) &&
+    localPlayers.length >= tournamentTeams.length;
 
   return (
     <View className="flex-1 bg-gray-100 p-4">
@@ -276,19 +279,23 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
         <TouchableOpacity
           onPress={() => setScreenType("curr_players_list")}
           activeOpacity={1}
-          className="px-4 py-2 rounded-xl border-2 border-gray-800 w-[49%] bg-gray-800"
+          className={`px-4 py-2 rounded-xl border-2 border-gray-800 w-[49%] ${screenType === "curr_players_list" && "bg-gray-800"}`}
         >
-          <Text className="text-white font-semibold text-center">
+          <Text
+            className={`font-semibold text-center ${screenType === "curr_players_list" ? "text-white" : "text-gray-800"}`}
+          >
             Added players
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => setScreenType("saved_players_list")}
           activeOpacity={1}
-          className="px-4 py-2 rounded-xl w-[49%] border-2 border-gray-800"
+          className={`px-4 py-2 rounded-xl w-[49%] border-2 border-gray-800 ${screenType === "saved_players_list" && "bg-gray-800"}`}
           disabled={Object.values(playersById).length === 0}
         >
-          <Text className="text-gray-800 font-semibold text-center">
+          <Text
+            className={`text-gray-800 font-semibold text-center ${screenType === "saved_players_list" ? "text-white" : "text-gray-800"}`}
+          >
             Saved players
           </Text>
         </TouchableOpacity>
@@ -324,7 +331,9 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
 
       {screenType === "curr_players_list" && (
         <View className="flex-1">
-          <Text className="text-xl font-medium mb-4">Currently Added Players</Text>
+          <Text className="text-xl font-medium mb-4">
+            Currently Added Players
+          </Text>
           {/* players list */}
           <FlatList
             data={localPlayers}
@@ -385,7 +394,9 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
       {/* Global Players selector */}
       {screenType === "saved_players_list" && (
         <View className="flex-1">
-          <Text className="text-xl font-medium mb-4">Import from Saved Players</Text>
+          <Text className="text-xl font-medium mb-4">
+            Import from Saved Players
+          </Text>
           <FlatList
             data={Object.values(playersById).filter((item) =>
               localPlayers.every((player) => player.id !== item.id)

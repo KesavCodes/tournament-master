@@ -131,7 +131,7 @@ export default function Fixtures({ navigation, route }: Props) {
     navigation.navigate("Knockout", { id: currTournamentId });
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     const unsubscribe = navigation.addListener("beforeRemove", (e) => {
       e.preventDefault();
       navigation.navigate("Home");
@@ -220,7 +220,14 @@ export default function Fixtures({ navigation, route }: Props) {
             []) as unknown as FixturesWithTeamNames[]
         }
         keyExtractor={(m) => m.id}
-        renderItem={({item})=> <FixtureRow item={item} handler={matchResultHandler} activeOpacity={0.7} disabled={false} />}
+        renderItem={({ item }) => (
+          <FixtureRow
+            item={item}
+            handler={matchResultHandler}
+            activeOpacity={0.7}
+            disabled={false}
+          />
+        )}
       />
 
       {/* ---------------- PROCEED BUTTON ---------------- */}

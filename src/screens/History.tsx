@@ -22,7 +22,7 @@ export default function History({ navigation }: Props) {
       <FlatList
         data={tournaments}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingBottom: 20 }}
+        contentContainerStyle={{ paddingBottom: 20}}
         ListEmptyComponent={
           <Text className="text-center text-lg my-12">
             No Tournaments found

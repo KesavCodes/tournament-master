@@ -30,8 +30,7 @@ export default function App() {
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <NavigationContainer>
-          <StatusBar style="auto" />
-
+          <StatusBar style="light" />
           <Stack.Navigator
             initialRouteName="Home"
             screenOptions={{

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -196,6 +196,15 @@ export default function AddTeamsScreen({ navigation, route }: Props) {
     navigation.navigate("AddPlayers", { id: tournamentId });
   };
 
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("beforeRemove", (e) => {
+      e.preventDefault();
+      navigation.navigate("CreateTournament", { id: tournamentId });
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
   // When user goes back and changes number in CreateTournament, we must reconcile.
   // Since CreateTournament updates tournament.noOfTeams, AddTeams is remounted and localTeams effect runs again.
   // So reconciliation (increase/decrease) is already handled in effect above.
@@ -206,7 +215,7 @@ export default function AddTeamsScreen({ navigation, route }: Props) {
         Setup Teams ({expectedCount})
       </Text>
 
-      <View className="flex-row justify-end mb-3">
+      <View className="flex-row justify-between mb-3">
         <TouchableOpacity
           activeOpacity={1}
           className="bg-gray-800 px-3 py-2 rounded-2xl mr-2"
@@ -265,6 +274,7 @@ export default function AddTeamsScreen({ navigation, route }: Props) {
       <TouchableOpacity
         className="bg-gray-800 py-3 rounded-2xl mt-4 mb-10"
         onPress={saveTeams}
+        activeOpacity={1}
       >
         <Text className="text-white text-center font-semibold">Save Teams</Text>
       </TouchableOpacity>
