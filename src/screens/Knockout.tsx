@@ -118,33 +118,29 @@ export default function Knockout({ navigation, route }: Props) {
     dispatch(bulkUpsertFixtures([sf1, sf2, finalEmpty]));
   }, []);
 
-useEffect(() => {
-  if (teamCount <= 4) return; // final-only tournaments skip
-  if (semiFinals.length < 2 || !finalMatch) return;
+  useEffect(() => {
+    if (teamCount <= 4) return; // final-only tournaments skip
+    if (semiFinals.length < 2 || !finalMatch) return;
 
-  const winners = semiFinals.map(m => m.winnerId).filter(Boolean);
+    const winners = semiFinals.map((m) => m.winnerId).filter(Boolean);
 
-  // final already updated → skip
-  if (
-    finalMatch.teamAId !== "TBA-1" &&
-    finalMatch.teamBId !== "TBA-2"
-  ) {
-    return;
-  }
+    // final already updated → skip
+    if (finalMatch.teamAId !== "TBA-1" && finalMatch.teamBId !== "TBA-2") {
+      return;
+    }
 
-  if (winners.length === 2) {
-    dispatch(
-      bulkUpsertFixtures([
-        {
-          ...finalMatch,
-          teamAId: winners[0]!,
-          teamBId: winners[1]!,
-        },
-      ])
-    );
-  }
-}, [semiFinals, finalMatch?.id, finalMatch?.teamAId, finalMatch?.teamBId]);
-
+    if (winners.length === 2) {
+      dispatch(
+        bulkUpsertFixtures([
+          {
+            ...finalMatch,
+            teamAId: winners[0]!,
+            teamBId: winners[1]!,
+          },
+        ])
+      );
+    }
+  }, [semiFinals, finalMatch?.id, finalMatch?.teamAId, finalMatch?.teamBId]);
 
   // --- Modal open ---
   const openModal = (matchId: string) => {
@@ -244,7 +240,9 @@ useEffect(() => {
           <Text className="text-2xl font-bold mb-4 text-center text-green-600">
             🏆 {teamsById[namedFinal?.winnerId].name} 🏆
           </Text>
-          <Text className="text-xl font-bold mb-4 text-center text-gray-800">✨ Won the Tournament ✨</Text>
+          <Text className="text-xl font-bold mb-4 text-center text-gray-800">
+            ✨ Won the Tournament ✨
+          </Text>
         </View>
       )}
       {semiFinals.length > 0 && (
@@ -316,6 +314,7 @@ useEffect(() => {
               keyboardType="numeric"
               value={selectedMatch?.scoreA}
               placeholder="Score"
+              placeholderTextColor="#595a5aff"
               onChangeText={(txt) =>
                 setSelectedMatch((p) => ({ ...p!, scoreA: txt }))
               }
@@ -330,6 +329,7 @@ useEffect(() => {
               keyboardType="numeric"
               value={selectedMatch?.scoreB}
               placeholder="Score"
+              placeholderTextColor="#595a5aff"
               onChangeText={(txt) =>
                 setSelectedMatch((p) => ({ ...p!, scoreB: txt }))
               }

@@ -96,6 +96,7 @@ export default function CreateTournament({ navigation, route }: Props) {
       <TextInput
         className="border border-gray-300 p-3 rounded-2xl mb-5"
         placeholder="Enter tournament name"
+        placeholderTextColor="#595a5aff"
         value={name}
         onChangeText={setName}
       />
@@ -107,6 +108,7 @@ export default function CreateTournament({ navigation, route }: Props) {
         onChangeText={numInputHandler}
         keyboardType="numeric"
         inputMode="numeric"
+        placeholderTextColor="#595a5aff"
       />
 
       <Text className="text-gray-500 text-sm mb-6">

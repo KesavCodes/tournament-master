@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -31,31 +31,81 @@ import {
 type Props = NativeStackScreenProps<RootStackParamList, "AddTeams">;
 
 const DEFAULT_PALETTE = [
-  "#EF4444",
-  "#3B82F6",
-  "#10B981",
-  "#F59E0B",
-  "#8B5CF6",
-  "#EC4899",
-  "#F97316",
-  "#06B6D4",
-  "#374151",
-  "#0EA5A4",
+  // RED
+  "#FCA5A5", // red-300
+  "#EF4444", // red-500
+  "#B91C1C", // red-700
+
+  // BLUE
+  "#93C5FD", // blue-300
+  "#3B82F6", // blue-500
+  "#1D4ED8", // blue-700
+
+  // GREEN (EMERALD)
+  "#6EE7B7", // emerald-300
+  "#10B981", // emerald-500
+  "#047857", // emerald-700
+
+  // AMBER
+  "#FCD34D", // amber-300
+  "#F59E0B", // amber-500
+  "#B45309", // amber-700
+
+  // VIOLET
+  "#C4B5FD", // violet-300
+  "#8B5CF6", // violet-500
+  "#6D28D9", // violet-700
+
+  // PINK
+  "#F9A8D4", // pink-300
+  "#EC4899", // pink-500
+  "#BE185D", // pink-700
+
+  // ORANGE
+  "#FDBA74", // orange-300
+  "#F97316", // orange-500
+  "#C2410C", // orange-700
+
+  // CYAN
+  "#67E8F9", // cyan-300
+  "#06B6D4", // cyan-500
+  "#0E7490", // cyan-700
+
+  // TEAL
+  "#5EEAD4", // teal-300
+  "#0EA5A4", // teal-500
+  "#115E59", // teal-700
+
+  // GRAY (NEUTRAL)
+  "#D1D5DB", // gray-300
+  "#6B7280", // gray-500
+  "#374151", // gray-700
+
+  // INDIGO
+  "#A5B4FC", // indigo-300
+  "#6366F1", // indigo-500
+  "#4338CA", // indigo-700
+
+  // LIME
+  "#BEF264", // lime-300
+  "#84CC16", // lime-500
+  "#4D7C0F", // lime-700
+
+  // ROSE
+  "#FDA4AF", // rose-300
+  "#F43F5E", // rose-500
+  "#BE123C", // rose-700
+
+  // SKY
+  "#7DD3FC", // sky-300
+  "#0EA5E9", // sky-500
+  "#0369A1", // sky-700
+
+  // FUCHSIA
+  "#F0ABFC", // fuchsia-300
+  "#D946EF", // fuchsia-500
+  "#A21CAF", // fuchsia-700
 ];
-
-function randomColorFromPalette(palette: string[]) {
-  return palette[Math.floor(Math.random() * palette.length)];
-}
-
-function makeDummyTeam(index: number, color?: string): TeamType {
-  return {
-    id: Date.now().toString() + "-" + index,
-    name: `Team ${index + 1}`,
-    color: color ?? randomColorFromPalette(DEFAULT_PALETTE),
-    logo_url: null,
-    created_at: new Date().toISOString(),
-  };
-}
 
 export default function AddTeamsScreen({ navigation, route }: Props) {
   const { id: tournamentId } = route.params;
@@ -79,6 +129,28 @@ export default function AddTeamsScreen({ navigation, route }: Props) {
     number | null
   >(null);
   const [hexInput, setHexInput] = useState<string>("");
+  const uniqueColors = useRef<string[]>([]);
+
+  function randomColorFromPalette(palette: string[]) {
+    if (uniqueColors.current.length >= palette.length / 2) {
+      uniqueColors.current = [];
+    }
+    let randomizedColor = palette[Math.floor(Math.random() * palette.length)];
+    while (uniqueColors.current.includes(randomizedColor))
+      randomizedColor = palette[Math.floor(Math.random() * palette.length)];
+    uniqueColors.current.push(randomizedColor);
+    return randomizedColor;
+  }
+
+  function makeDummyTeam(index: number, color?: string): TeamType {
+    return {
+      id: Date.now().toString() + "-" + index,
+      name: `Team ${index + 1}`,
+      color: color ?? randomColorFromPalette(DEFAULT_PALETTE),
+      logo_url: null,
+      created_at: new Date().toISOString(),
+    };
+  }
 
   // on mount: build initial localTeams from existing tournamentTeams or create dummies
   useEffect(() => {
@@ -254,6 +326,7 @@ export default function AddTeamsScreen({ navigation, route }: Props) {
                 onChangeText={(text) => updateLocalTeam(index, { name: text })}
                 className="border p-2 rounded-xl mb-2"
                 placeholder={`Team ${index + 1}`}
+                placeholderTextColor="#595a5aff"
                 maxLength={30}
               />
               <Text className="text-sm text-gray-500">Team #{index + 1}</Text>
@@ -292,8 +365,8 @@ export default function AddTeamsScreen({ navigation, route }: Props) {
                   onPress={() => applyColorFromModal(c)}
                   style={{
                     backgroundColor: c,
-                    width: 44,
-                    height: 44,
+                    width: 40,
+                    height: 40,
                     borderRadius: 10,
                     margin: 6,
                   }}
@@ -307,6 +380,7 @@ export default function AddTeamsScreen({ navigation, route }: Props) {
               onChangeText={setHexInput}
               placeholder="#FF0000"
               className="border p-2 rounded-xl mb-4"
+              placeholderTextColor="#595a5aff"
             />
 
             <View className="flex-row justify-end">

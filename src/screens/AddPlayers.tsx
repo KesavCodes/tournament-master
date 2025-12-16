@@ -256,6 +256,7 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
         <TextInput
           className="flex-1 border p-2 rounded-xl mr-3"
           placeholder="Enter player name"
+          placeholderTextColor="#595a5aff"
           value={playerName}
           onChangeText={(t) => {
             setPlayerName(t);

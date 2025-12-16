@@ -36,6 +36,8 @@ export default function Fixtures({ navigation, route }: Props) {
     teamB: string;
     teamAId: string;
     teamBId: string;
+    teamAColor: string;
+    teamBColor: string;
     teamAScore?: string;
     teamBScore?: string;
   } | null>(null);
@@ -69,6 +71,8 @@ export default function Fixtures({ navigation, route }: Props) {
       id: match.id,
       teamA: teamsById[match.teamAId].name,
       teamB: teamsById[match.teamBId].name,
+      teamAColor: teamsById[match.teamAId].color ?? "#94ff55ff",
+      teamBColor: teamsById[match.teamBId].color ?? "#729ff9ff",
       teamAId: match.teamAId,
       teamBId: match.teamBId,
       teamAScore: match.teamAScore?.toString() || "",
@@ -172,28 +176,50 @@ export default function Fixtures({ navigation, route }: Props) {
             </View>
 
             {/* TEAM A */}
-            <Text className="text-lg font-semibold mb-1">
-              {selectedMatch?.teamA}
-            </Text>
+            <View className="flex-row gap-2 items-center mb-1">
+              <View
+                style={{
+                  width: 16,
+                  height: 16,
+                  borderRadius: "50%",
+                  backgroundColor: selectedMatch?.teamAColor,
+                }}
+              />
+              <Text className="text-lg font-semibold mb-1">
+                {selectedMatch?.teamA}
+              </Text>
+            </View>
             <TextInput
               className="border border-gray-400 rounded-xl p-3 text-lg mb-4"
               keyboardType="numeric"
               value={selectedMatch?.teamAScore}
               placeholder="Score"
+              placeholderTextColor="#595a5aff"
               onChangeText={(txt) =>
                 setSelectedMatch((p) => ({ ...p!, teamAScore: txt }))
               }
             />
 
             {/* TEAM B */}
-            <Text className="text-lg font-semibold mb-1">
-              {selectedMatch?.teamB}
-            </Text>
+            <View className="flex-row gap-2 items-center mb-1">
+              <View
+                style={{
+                  width: 16,
+                  height: 16,
+                  borderRadius: "50%",
+                  backgroundColor: selectedMatch?.teamBColor,
+                }}
+              />
+              <Text className="text-lg font-semibold mb-1">
+                {selectedMatch?.teamB}
+              </Text>
+            </View>
             <TextInput
               className="border border-gray-400 rounded-xl p-3 text-lg mb-4"
               keyboardType="numeric"
               value={selectedMatch?.teamBScore}
               placeholder="Score"
+              placeholderTextColor="#595a5aff"
               onChangeText={(txt) =>
                 setSelectedMatch((p) => ({ ...p!, teamBScore: txt }))
               }
