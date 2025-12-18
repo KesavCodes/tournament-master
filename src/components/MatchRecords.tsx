@@ -71,7 +71,7 @@ const MatchRecords = () => {
             </View>
           </View>
         )}
-
+{/* 
         {mostDominantWin && (
           <View className="rounded-xl px-4 py-3">
             <Text className="font-bold text-gray-800 text-base mb-2">
@@ -95,9 +95,9 @@ const MatchRecords = () => {
               </View>
             </View>
           </View>
-        )}
+        )} */}
 
-        {mostCleanWins && (
+        {/* {mostCleanWins && (
           <View className="flex-row justify-between items-center rounded-xl px-4 py-3">
             <View className="flex-1">
               <Text className="font-bold text-gray-800 text-base">
@@ -113,7 +113,7 @@ const MatchRecords = () => {
               </Text>
             </View>
           </View>
-        )}
+        )} */}
         </View>
       )}
     </View>
