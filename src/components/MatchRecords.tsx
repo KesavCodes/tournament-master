@@ -43,11 +43,11 @@ const MatchRecords = () => {
                 🔥 Longest Winning Streak
               </Text>
             </View>
-            <View className="items-end">
-              <Text className="text-gray-900 font-semibold text-base">
+            <View className="items-center flex-row gap-2">
+              <Text className="text-gray-900 font-semibold">
                 {records.longestWinStreak.playerName}
               </Text>
-              <Text className="text-green-600 font-bold text-lg">
+              <Text className="text-green-600 font-bold">
                 {records.longestWinStreak.streak}W
               </Text>
             </View>
@@ -61,11 +61,11 @@ const MatchRecords = () => {
                 💔 Longest Losing Streak
               </Text>
             </View>
-            <View className="items-end">
-              <Text className="text-gray-900 font-semibold text-base">
+            <View className="items-center flex-row gap-2">
+              <Text className="text-gray-900 font-semibold">
                 {records.longestLoseStreak.playerName}
               </Text>
-              <Text className="text-red-600 font-bold text-lg">
+              <Text className="text-red-600 font-bold">
                 {records.longestLoseStreak.streak}L
               </Text>
             </View>
