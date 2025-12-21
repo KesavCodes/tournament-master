@@ -7,11 +7,15 @@ const FixtureRow = ({
   handler,
   activeOpacity = 0.7,
   disabled = false,
+  teamALeaders,
+  teamBLeaders,
 }: {
   item: FixturesWithTeamNames;
   handler: (matchId: string) => void;
   activeOpacity: number;
   disabled: boolean;
+  teamALeaders: { name: string; role: string[] | undefined }[];
+  teamBLeaders: { name: string; role: string[] | undefined }[];
 }) => {
   const hasResult = item.winnerId !== undefined;
   const teamAWin = hasResult && item.winnerId === item.teamAId;
@@ -27,24 +31,49 @@ const FixtureRow = ({
       {/* TEAM ROW */}
       <View className="flex flex-row justify-between mb-2">
         {/* TEAM A */}
-        <Text
-          className={`w-[49%] border-0 border-r-2 pr-2 text-base ${
-            teamAWin ? "font-bold text-green-600" : "text-gray-700"
-          }`}
-          numberOfLines={1}
-        >
-          {teamAWin ? "🏆" : ""} {item.teamA}
-        </Text>
-
-        {/* TEAM B */}
-        <Text
-          className={`w-[49%] text-right text-base ${
-            teamBWin ? "font-bold text-green-600" : "text-gray-700"
-          }`}
-          numberOfLines={1}
-        >
-          {teamBWin ? "🏆" : ""} {item.teamB} 
-        </Text>
+        <View className="w-[49%] border-0 border-r-2 pr-2">
+          <Text
+            className={`text-base font-bold mb-1 ${
+              teamAWin ? "font-bold text-green-600" : "text-gray-700"
+            }`}
+            numberOfLines={1}
+          >
+            {teamAWin ? "🏆 " : ""}
+            {item.teamA}
+          </Text>
+          {teamALeaders.length > 0 && teamALeaders[0] && (
+            <Text className="text-sm text-gray-700">
+              {teamALeaders[0].name} (C)
+            </Text>
+          )}
+          {teamALeaders.length > 0 && teamALeaders[1] && (
+            <Text className="text-sm text-gray-700">
+              {teamALeaders[1].name} (VC)
+            </Text>
+          )}
+        </View>
+        <View className="w-[49%]">
+          {/* TEAM B */}
+          <Text
+            className={`text-right text-base font-bold mb-1 ${
+              teamBWin ? "font-bold text-green-600" : "text-gray-700"
+            }`}
+            numberOfLines={1}
+          >
+            {teamBWin ? "🏆 " : ""}
+            {item.teamB}
+          </Text>
+          {teamBLeaders.length > 0 && teamBLeaders[0] && (
+            <Text className="text-sm text-right text-gray-700">
+              {teamBLeaders[0].name} (C)
+            </Text>
+          )}
+          {teamBLeaders.length > 0 && teamBLeaders[1] && (
+            <Text className="text-sm text-right text-gray-700">
+              {teamBLeaders[1].name} (VC)
+            </Text>
+          )}
+        </View>
       </View>
       {/* INLINE SCORE BADGE */}
       {hasResult &&
@@ -55,9 +84,11 @@ const FixtureRow = ({
             {item.teamA} {item.teamAScore} - {item.teamBScore} {item.teamB}
           </Text>
         </View>
-      ) : (
-        <Text className="text-gray-500">Tap to record result</Text>
-      )}
+      ) : !disabled ? (
+        <Text className="text-gray-500 text-center text-sm font-medium">
+          Tap to record result
+        </Text>
+      ) : null}
     </TouchableOpacity>
   );
 };

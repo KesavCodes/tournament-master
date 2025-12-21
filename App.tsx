@@ -13,6 +13,7 @@ import HomeScreen from "./src/screens/Home";
 import CreateTournamentScreen from "./src/screens/CreateTournament";
 import AddTeamsScreen from "./src/screens/AddTeams";
 import AddPlayersScreen from "./src/screens/AddPlayers";
+import TeamRolesScreen from "./src/screens/TeamRoles";
 import FixturesScreen from "./src/screens/Fixtures";
 import ScoreboardScreen from "./src/screens/Scoreboard";
 import TeamInfoScreen from "./src/screens/TeamInfo";
@@ -58,6 +59,11 @@ export default function App() {
               name="AddPlayers"
               component={AddPlayersScreen}
               options={{ title: "Add Players" }}
+            />
+            <Stack.Screen
+              name="TeamRoles"
+              component={TeamRolesScreen}
+              options={{ title: "Select Players Role" }}
             />
             <Stack.Screen
               name="Fixtures"

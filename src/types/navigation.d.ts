@@ -9,6 +9,7 @@ export type RootStackParamList = {
     id: string;
   };
   AddPlayers: { id: string};
+  TeamRoles: { id: string}; 
   Results: { name: string };
   Scoreboard: { id: string };
   History: undefined;

@@ -1,7 +1,17 @@
 export type ID = string;
 
 export type TournamentType = "knockout" | "league";
-export type TournamentStatus = "not_started" | "league" | "knockout" | "completed";
+export type TournamentStatus =
+  | "not_started"
+  | "league"
+  | "knockout"
+  | "completed";
+
+export type TeamPlayerRole =
+  | "playing"
+  | "sub"
+  | "captain"
+  | "vice_captain";
 
 export interface Tournament {
   id: ID;
@@ -34,6 +44,12 @@ export interface TournamentTeam {
   tournament_id: ID;
   global_team_id: ID;
   players: ID[]; // player ids
+  /**
+   * Roles assigned to players
+   * key = playerId
+   * value = list of roles
+   */
+  playerRoles?: Record<ID, TeamPlayerRole[]>;
   created_at: string;
 }
 

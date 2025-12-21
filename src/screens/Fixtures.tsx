@@ -53,6 +53,9 @@ export default function Fixtures({ navigation, route }: Props) {
     (state: RootState) => state.tournaments.byId
   )[currTournamentId];
 
+  const tournamentTeamsById = useAppSelector((s) => s.tournamentTeams.byId);
+  const playersById = useAppSelector((s) => s.players.byId);
+
   currTournamentFixtures = currTournamentFixtures.filter(
     (item: any) => item.round <= 1000
   );
@@ -135,6 +138,20 @@ export default function Fixtures({ navigation, route }: Props) {
     navigation.navigate("Knockout", { id: currTournamentId });
   };
 
+  const teamLeaders = (tournamentId: string, teamId: string) => {
+    const tournamentTeam = Object.values(tournamentTeamsById).find(
+      (tt) => tt.tournament_id === tournamentId && tt.global_team_id === teamId
+    );
+    return Object.entries(tournamentTeam?.playerRoles || {})
+      .map(([key, roles]) => ({ key, roles }))
+      .filter(
+        ({ roles }) =>
+          roles.includes("captain") || roles.includes("vice_captain")
+      )
+      .map(({ key, roles }) => ({ name: playersById[key]?.name, role: roles }))
+      .sort((a, _) => (a.role.includes("captain") ? 1 : -1));
+  };
+
   useEffect(() => {
     const unsubscribe = navigation.addListener("beforeRemove", (e) => {
       e.preventDefault();
@@ -144,6 +161,12 @@ export default function Fixtures({ navigation, route }: Props) {
     return unsubscribe;
   }, [navigation]);
 
+  const selectedTeamALeaders = selectedMatch
+    ? teamLeaders(currTournamentId, selectedMatch.teamAId)
+    : [];
+  const selectedTeamBLeaders = selectedMatch
+    ? teamLeaders(currTournamentId, selectedMatch.teamBId)
+    : [];
   return (
     <View className="flex-1 bg-white py-4 px-3">
       {/* ---------------- MODAL FOR SCORE ENTRY ---------------- */}
@@ -176,18 +199,34 @@ export default function Fixtures({ navigation, route }: Props) {
             </View>
 
             {/* TEAM A */}
-            <View className="flex-row gap-2 items-center mb-1">
-              <View
-                style={{
-                  width: 16,
-                  height: 16,
-                  borderRadius: "50%",
-                  backgroundColor: selectedMatch?.teamAColor,
-                }}
-              />
-              <Text className="text-lg font-semibold mb-1">
-                {selectedMatch?.teamA}
-              </Text>
+            <View className="mb-1">
+              <View className="flex-row gap-2 items-center">
+                <View
+                  style={{
+                    width: 16,
+                    height: 16,
+                    borderRadius: "50%",
+                    borderWidth: 1,
+                    borderColor: "#00000055",
+                    backgroundColor: selectedMatch?.teamAColor,
+                  }}
+                />
+                <Text className="text-lg font-semibold mb-1">
+                  {selectedMatch?.teamA}
+                </Text>
+              </View>
+              <View className="flex-row mb-1 pl-1">
+                {selectedTeamALeaders.length > 0 && selectedTeamALeaders[0] && (
+                  <Text className="text-sm text-gray-700">
+                    {selectedTeamALeaders[0].name} (c)
+                  </Text>
+                )}
+                {selectedTeamALeaders.length > 0 && selectedTeamALeaders[1] && (
+                  <Text className="text-sm text-gray-700">
+                    , {selectedTeamALeaders[1].name} (vc)
+                  </Text>
+                )}
+              </View>
             </View>
             <TextInput
               className="border border-gray-400 rounded-xl p-3 text-lg mb-4"
@@ -201,18 +240,34 @@ export default function Fixtures({ navigation, route }: Props) {
             />
 
             {/* TEAM B */}
-            <View className="flex-row gap-2 items-center mb-1">
-              <View
-                style={{
-                  width: 16,
-                  height: 16,
-                  borderRadius: "50%",
-                  backgroundColor: selectedMatch?.teamBColor,
-                }}
-              />
-              <Text className="text-lg font-semibold mb-1">
-                {selectedMatch?.teamB}
-              </Text>
+            <View className="mb-1">
+              <View className="flex-row gap-2 items-center ">
+                <View
+                  style={{
+                    width: 16,
+                    height: 16,
+                    borderRadius: "50%",
+                    borderWidth: 1,
+                    borderColor: "#00000055",
+                    backgroundColor: selectedMatch?.teamBColor,
+                  }}
+                />
+                <Text className="text-lg font-semibold mb-1">
+                  {selectedMatch?.teamB}
+                </Text>
+              </View>
+              <View className="flex-row mb-1 pl-1">
+                {selectedTeamBLeaders.length > 0 && selectedTeamBLeaders[0] && (
+                  <Text className="text-sm text-gray-700">
+                    {selectedTeamBLeaders[0].name} (c)
+                  </Text>
+                )}
+                {selectedTeamBLeaders.length > 0 && selectedTeamBLeaders[1] && (
+                  <Text className="text-sm text-gray-700">
+                    , {selectedTeamBLeaders[1].name} (vc)
+                  </Text>
+                )}
+              </View>
             </View>
             <TextInput
               className="border border-gray-400 rounded-xl p-3 text-lg mb-4"
@@ -252,6 +307,8 @@ export default function Fixtures({ navigation, route }: Props) {
             handler={matchResultHandler}
             activeOpacity={0.7}
             disabled={false}
+            teamALeaders={teamLeaders(currTournamentId, item.teamAId)}
+            teamBLeaders={teamLeaders(currTournamentId, item.teamBId)}
           />
         )}
       />

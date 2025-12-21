@@ -18,10 +18,7 @@ import {
   updateTournamentTeam,
   // addTournamentTeam,
 } from "../store/slice/tournamentTeamsSlice";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { generateRoundRobinFixtures } from "../utils/generateFixture";
-import { updateTournament } from "../store/slice/tournamentsSlice";
-import { bulkUpsertFixtures } from "../store/slice/fixturesSlice";
+import Ionicons from "@expo/vector-icons/Ionicons";  
 
 type Props = NativeStackScreenProps<RootStackParamList, "AddPlayers">;
 
@@ -36,8 +33,6 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
   const dispatch = useAppDispatch();
 
   // selectors
-  const tournamentsById = useAppSelector((s) => s.tournaments.byId);
-  const tournament = tournamentsById[tournamentId];
   const tournamentTeamsById = useAppSelector((s) => s.tournamentTeams.byId);
   const teamsById = useAppSelector((s) => s.teams.byId);
   const playersById = useAppSelector((s) => s.players.byId);
@@ -206,31 +201,7 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
       dispatch(updateTournamentTeam({ ...tt, players: ttMap[tt.id] || [] }));
     });
 
-    // 3. Generate round-robin fixtures
-    const fixturesRaw = generateRoundRobinFixtures(tournamentTeams);
-
-    dispatch(
-      bulkUpsertFixtures(
-        fixturesRaw.map((fixture, index) => ({
-          ...fixture,
-          tournament_id: tournamentId,
-          created_at: new Date().toISOString() + index.toString(),
-        }))
-      )
-    );
-
-    // 5. Update config status
-    dispatch(
-      updateTournament({
-        ...tournament,
-        status: fixturesRaw.length === 1 ? "knockout" : "league",
-        isConfigCompleted: true,
-      })
-    );
-
-    navigation.navigate(fixturesRaw.length === 1 ? "Knockout" : "Fixtures", {
-      id: tournamentId,
-    });
+    navigation.navigate("TeamRoles", { id: tournamentId });
   };
 
   const allAssigned =
@@ -239,7 +210,7 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
     localPlayers.length >= tournamentTeams.length;
 
   return (
-    <View className="flex-1 bg-gray-100 p-4">
+    <View className="flex-1 bg-gray-100 py-4 px-3">
       <View className="flex-row justify-between items-center mb-4">
         <Text className="text-2xl font-bold">Add Players</Text>
         <TouchableOpacity
@@ -438,7 +409,7 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
         onPress={proceed}
       >
         <Text className="text-white text-center font-semibold">
-          Confirm and Start Tournament
+          Assign Roles
         </Text>
       </TouchableOpacity>
     </View>

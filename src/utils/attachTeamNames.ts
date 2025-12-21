@@ -1,4 +1,4 @@
-import { Fixture, TournamentTeam } from "../types";
+import { Fixture } from "../types";
 
 
 export type FixturesWithTeamNames = Fixture & { 
@@ -7,7 +7,7 @@ export type FixturesWithTeamNames = Fixture & {
 };
 export function attachTeamNames(
   fixtures: Fixture[],
-  globalTeamsById: Record<string, { name: string }>
+  globalTeamsById: Record<string, { name: string }>,
 ) {
   return fixtures.map((f) => {
     if(!globalTeamsById[f.teamAId] || !globalTeamsById[f.teamBId]) return {}

@@ -20,7 +20,6 @@ const MatchRecords = () => {
     records.longestLoseStreak ||
     mostDominantWin ||
     mostCleanWins;
-    console.log(records)
   return (
     <View className="border-0 bg-gray-200 rounded-2xl mt-6 overflow-hidden">
       <View className="bg-gray-800 px-6 py-4">
