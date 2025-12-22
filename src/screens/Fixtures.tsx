@@ -129,13 +129,29 @@ export default function Fixtures({ navigation, route }: Props) {
   );
 
   const proceedToKnockout = () => {
-    dispatch(
-      updateTournament({
-        ...currTournament,
-        status: "knockout",
-      })
+    Alert.alert(
+      "Proceed to Knockouts",
+      "Are you sure you want to proceed to the knockout stage? This action cannot be undone.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Proceed",
+          style: "destructive",
+          onPress: () => {
+            dispatch(
+              updateTournament({
+                ...currTournament,
+                status: "knockout",
+              })
+            );
+            navigation.navigate("Knockout", { id: currTournamentId });
+          },
+        },
+      ]
     );
-    navigation.navigate("Knockout", { id: currTournamentId });
   };
 
   const teamLeaders = (tournamentId: string, teamId: string) => {
