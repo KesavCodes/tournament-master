@@ -7,11 +7,7 @@ export type TournamentStatus =
   | "knockout"
   | "completed";
 
-export type TeamPlayerRole =
-  | "playing"
-  | "sub"
-  | "captain"
-  | "vice_captain";
+export type TeamPlayerRole = "playing" | "sub" | "captain" | "vice_captain";
 
 export interface Tournament {
   id: ID;
@@ -78,4 +74,14 @@ export interface PlayerGroupMember {
   group_id: ID;
   player_id: ID;
   created_at: string;
+}
+
+export interface ExportPayload {
+  version: number;
+  exportedAt: string;
+  tournaments: Tournament[];
+  tournamentTeams: TournamentTeam[];
+  fixtures: Fixture[];
+  players: Player[];
+  teams: Team[];
 }

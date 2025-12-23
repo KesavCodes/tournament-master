@@ -1,26 +1,27 @@
 import { View, Text, TouchableOpacity, Switch } from "react-native";
 import React, { useState } from "react";
+import SettingsItem from "../components/SettingsItem";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../types/navigation";
 
-export default function Settings() {
-  const [darkMode, setDarkMode] = useState(false);
+type Props = NativeStackScreenProps<RootStackParamList, "Settings">;
 
+export default function Settings({ navigation }: Props) {
   return (
-    <View className="flex-1 bg-white p-5">
-      <Text className="text-2xl font-bold mb-4">Settings</Text>
-
-      <View className="flex-row justify-between items-center mb-4">
-        <Text className="text-lg text-gray-700">Dark Mode</Text>
-        <Switch value={darkMode} onValueChange={setDarkMode} />
-      </View>
-
-      <TouchableOpacity
-        className="bg-red-500 py-3 rounded-2xl"
-        activeOpacity={1}
-      >
-        <Text className="text-center text-white font-semibold">
-          Clear All Data
-        </Text>
-      </TouchableOpacity>
+    <View className="flex-1 bg-white px-3 pv-4">
+      <Text className="text-2xl font-bold mb-6">Settings</Text>
+      <SettingsItem
+        icon="share-social-outline"
+        title="Export Data"
+        subtitle="Share all tournaments with friends"
+        onPress={() => {}}
+      />
+      <SettingsItem
+        icon="download-outline"
+        title="Import Data"
+        subtitle="Add tournaments from another device"
+        onPress={() => {}}
+      />
     </View>
   );
 }
