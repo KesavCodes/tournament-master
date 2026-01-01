@@ -120,6 +120,9 @@ export default function TeamRoles({ route, navigation }: Props) {
 
   return (
     <View className="flex-1 bg-gray-100 py-4 px-3">
+      <Text className="text-xl font-semibold mb-4 text-center">
+        Assign Captain and Vice Captain
+      </Text>
       <FlatList
         data={tournamentTeams}
         keyExtractor={(t) => t.id}

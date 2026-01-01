@@ -24,6 +24,9 @@ export default function CreateTournament({ navigation, route }: Props) {
   const [noOfTeams, setNoOfTeams] = useState(
     currTournament?.noOfTeams?.toString() || "2"
   );
+  const [noOfPlayersPerTeam, setNoOfPlayersPerTeam] = useState(
+    currTournament?.noOfPlayersPerTeam?.toString() || "1"
+  );
 
   const dispatch = useAppDispatch();
 
@@ -38,6 +41,11 @@ export default function CreateTournament({ navigation, route }: Props) {
       alert("At least 2 teams required.");
       return;
     }
+    const playersPerTeam = parseInt(noOfPlayersPerTeam, 10);
+    if (isNaN(playersPerTeam) || playersPerTeam < 1) {
+      alert("At least 1 player per team required.");
+      return;
+    }
 
     const tournamentData = {
       id: currTournamentId || Date.now().toString(),
@@ -46,6 +54,7 @@ export default function CreateTournament({ navigation, route }: Props) {
       status: currTournament?.status || "not_started",
       isConfigCompleted: currTournament?.isConfigCompleted || false,
       noOfTeams: teamCount,
+      noOfPlayersPerTeam: playersPerTeam,
       winnerTeamId: null,
       created_at: currTournament?.created_at || new Date().toISOString(),
     };
@@ -62,15 +71,23 @@ export default function CreateTournament({ navigation, route }: Props) {
   };
 
   /** input sanitization for team count */
-  const numInputHandler = (value: string) => {
+  const numInputHandler = (value: string, type: "team" | "player") => {
     const cleaned = value.replace(/[^0-9]/g, "");
-    if (!cleaned) {
-      setNoOfTeams("");
-      return;
-    }
-
     const num = parseInt(cleaned, 10);
-    setNoOfTeams(num < 2 ? "2" : num.toString());
+
+    if (type === "team") {
+      if (!cleaned) {
+        setNoOfTeams("");
+        return;
+      }
+      setNoOfTeams(num < 2 ? "2" : num.toString());
+    } else if (type === "player") {
+      if (!cleaned) {
+        setNoOfPlayersPerTeam("");
+        return;
+      }
+      setNoOfPlayersPerTeam(num < 1 ? "1" : num.toString());
+    }
   };
 
   /** Back button override */
@@ -105,7 +122,7 @@ export default function CreateTournament({ navigation, route }: Props) {
       <TextInput
         className="border border-gray-300 p-3 rounded-2xl mb-2"
         value={noOfTeams}
-        onChangeText={numInputHandler}
+        onChangeText={(value) => numInputHandler(value, "team")}
         keyboardType="numeric"
         inputMode="numeric"
         placeholderTextColor="#595a5aff"
@@ -114,6 +131,23 @@ export default function CreateTournament({ navigation, route }: Props) {
       <Text className="text-gray-500 text-sm mb-6">
         {" "}
         <Ionicons name="information-circle" size={14} /> Minimum 2 teams
+        required
+      </Text>
+      <Text className="mb-2 font-semibold text-gray-600">
+        Number of Players Per Team
+      </Text>
+      <TextInput
+        className="border border-gray-300 p-3 rounded-2xl mb-2"
+        value={noOfPlayersPerTeam}
+        onChangeText={(value) => numInputHandler(value, "player")}
+        keyboardType="numeric"
+        inputMode="numeric"
+        placeholderTextColor="#595a5aff"
+      />
+
+      <Text className="text-gray-500 text-sm mb-6">
+        {" "}
+        <Ionicons name="information-circle" size={14} /> Minimum 1 player
         required
       </Text>
 

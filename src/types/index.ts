@@ -15,6 +15,7 @@ export interface Tournament {
   type: TournamentType;
   status: TournamentStatus;
   noOfTeams: number;
+  noOfPlayersPerTeam: number;
   isConfigCompleted: boolean;
   winnerTeamId?: ID | null;
   created_at: string;

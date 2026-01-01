@@ -18,7 +18,7 @@ import {
   updateTournamentTeam,
   // addTournamentTeam,
 } from "../store/slice/tournamentTeamsSlice";
-import Ionicons from "@expo/vector-icons/Ionicons";  
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 type Props = NativeStackScreenProps<RootStackParamList, "AddPlayers">;
 
@@ -33,6 +33,7 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
   const dispatch = useAppDispatch();
 
   // selectors
+  const tournamentById = useAppSelector((s) => s.tournaments.byId);
   const tournamentTeamsById = useAppSelector((s) => s.tournamentTeams.byId);
   const teamsById = useAppSelector((s) => s.teams.byId);
   const playersById = useAppSelector((s) => s.players.byId);
@@ -181,6 +182,30 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
       return;
     }
 
+    const minPlayersNeeded =
+      tournamentById[tournamentId]?.noOfPlayersPerTeam || 1;
+    const teamCounts: Record<string, number> = {};
+    tournamentTeams.forEach((tt) => {
+      teamCounts[tt.id] = 0;
+    });
+    localPlayers.forEach((p) => {
+      const ttid = p.teamId!;
+      if (!teamCounts[ttid]) teamCounts[ttid] = 0;
+      teamCounts[ttid]++;
+    });
+    let alertMessage = "";
+    for (const [ttid, count] of Object.entries(teamCounts)) {
+      if (count < minPlayersNeeded) {
+        if (!alertMessage)
+          alertMessage =
+            `Each team must have at least ${minPlayersNeeded} players.`;
+        alertMessage += `\n${teamsById[tournamentTeamsById[ttid].global_team_id]?.name || "Some team"} has only ${count} players.`;
+      }
+    }
+    if (alertMessage) {
+      Alert.alert("Insufficient players", alertMessage.trim());
+      return;
+    }
     // 1. Save global players
     const playersToCreate = localPlayers.map((p) => ({
       id: p.id,
@@ -304,7 +329,7 @@ export default function AddPlayersScreen({ navigation, route }: Props) {
       {screenType === "curr_players_list" && (
         <View className="flex-1">
           <Text className="text-xl font-medium mb-4">
-            Currently Added Players
+            Currently Added Players ({localPlayers.length})
           </Text>
           {/* players list */}
           <FlatList
