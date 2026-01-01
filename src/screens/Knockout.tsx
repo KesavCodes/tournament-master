@@ -241,7 +241,7 @@ export default function Knockout({ navigation, route }: Props) {
           roles.includes("captain") || roles.includes("vice_captain")
       )
       .map(({ key, roles }) => ({ name: playersById[key]?.name, role: roles }))
-      .sort((a, _) => (a.role.includes("captain") ? 1 : -1));
+      .sort((a, _) => (a.role.includes("captain") ? -1 : 1));
   };
 
   useEffect(() => {
@@ -258,7 +258,7 @@ export default function Knockout({ navigation, route }: Props) {
   const selectedTeamBLeaders = selectedMatch
     ? teamLeaders(tournamentId, selectedMatch.teamBId)
     : [];
-  console.log(fixtures);
+    
   return (
     <View className="py-4 px-3 bg-white flex-1">
       <FixtureActions id={tournamentId} />
