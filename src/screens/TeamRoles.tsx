@@ -18,7 +18,7 @@ export default function TeamRoles({ route, navigation }: Props) {
   const tournament = tournamentsById[tournamentId];
   const tournamentTeamsById = useAppSelector((s) => s.tournamentTeams.byId);
   const tournamentTeams = Object.values(tournamentTeamsById).filter(
-    (tt) => tt.tournament_id === tournamentId
+    (tt) => tt.tournament_id === tournamentId,
   );
   const playersById = useAppSelector((s) => s.players.byId);
   const teamsById = useAppSelector((s) => s.teams.byId);
@@ -26,7 +26,7 @@ export default function TeamRoles({ route, navigation }: Props) {
   const updateRoles = (
     team: TournamentTeam,
     playerId: ID,
-    role: TeamPlayerRole
+    role: TeamPlayerRole,
   ) => {
     const prevRoles = team.playerRoles ?? {};
     const nextRoles: Record<ID, TeamPlayerRole[]> = {};
@@ -40,7 +40,7 @@ export default function TeamRoles({ route, navigation }: Props) {
     if (role === "captain" || role === "vice_captain") {
       const hasRole = nextRoles[playerId].includes(role);
       nextRoles[playerId] = nextRoles[playerId].filter(
-        (item) => !["captain", "vice_captain"].includes(item)
+        (item) => !["captain", "vice_captain"].includes(item),
       );
       for (const pid of team.players) {
         nextRoles[pid] = nextRoles[pid].filter((r) => r !== role);
@@ -68,7 +68,7 @@ export default function TeamRoles({ route, navigation }: Props) {
       updateTournamentTeam({
         ...team,
         playerRoles: nextRoles,
-      })
+      }),
     );
   };
 
@@ -81,8 +81,8 @@ export default function TeamRoles({ route, navigation }: Props) {
           ...fixture,
           tournament_id: tournamentId,
           created_at: new Date().toISOString() + index.toString(),
-        }))
-      )
+        })),
+      ),
     );
 
     // Update config status
@@ -91,7 +91,7 @@ export default function TeamRoles({ route, navigation }: Props) {
         ...tournament,
         status: fixturesRaw.length === 1 ? "knockout" : "league",
         isConfigCompleted: true,
-      })
+      }),
     );
 
     navigation.navigate(fixturesRaw.length === 1 ? "Knockout" : "Fixtures", {
@@ -102,10 +102,10 @@ export default function TeamRoles({ route, navigation }: Props) {
   const allAssigned = Object.values(tournamentTeams).every((team) => {
     const roles = team.playerRoles || {};
     const hasCaptain = Object.values(roles).some((roleList) =>
-      roleList.includes("captain")
+      roleList.includes("captain"),
     );
     const hasViceCaptain = Object.values(roles).some((roleList) =>
-      roleList.includes("vice_captain")
+      roleList.includes("vice_captain"),
     );
     return team.players.length === 1
       ? hasCaptain
@@ -126,9 +126,8 @@ export default function TeamRoles({ route, navigation }: Props) {
       <FlatList
         data={tournamentTeams}
         keyExtractor={(t) => t.id}
-        contentContainerStyle={{
-          height: "85%",
-        }}
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: 20 }}
         renderItem={({ item: team }) => (
           <TeamCard
             team={team}
